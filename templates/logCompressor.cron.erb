@@ -1,0 +1,6 @@
+## File managed by Puppet
+#
+# we run "/bin/su - <%= instance_owner %>" as the <%= instance_owner %> account is locked
+#
+# m h  dom mon dow   user   command
+10 0    *   *   *    root   /bin/su - <%= instance_owner %> -c "<%= instance_logCompressor -%>"

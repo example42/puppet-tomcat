@@ -1,0 +1,89 @@
+#! /bin/bash
+### BEGIN INIT INFO
+# Provides:          tomcat-<%= instance_name %>
+# Required-Start:    $network $named $remote_fs $syslog
+# Required-Stop:     $network $named $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+### END INIT INFO                                                                                                                                          
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+NAME=tomcat-<%= instance_name %>
+DESC="$NAME instance"
+PIDFILE="<%= instance_rundir %>/$NAME.pid"
+
+[ -r /etc/default/tomcat-<%= instance_name %> ] && . /etc/default/tomcat-<%= instance_name %>
+
+. /lib/lsb/init-functions
+
+start_tomcat-<%= instance_name %>() {
+	ps -p `cat $PIDFILE 2>>/dev/null` >> /dev/null 2>&1
+	RUNNING=$?
+	if [ $RUNNING -eq 0 ]; then
+		log_progress_msg "(already running)"
+		log_end_msg 0
+	else
+		# stale pid file
+		rm -f $PIDFILE
+		log_daemon_msg "Starting $DESC"
+		if [ $(id -n -u) = "<%= instance_owner %>" ]; then
+			CATALINA_PID=$PIDFILE <%= instance_startup %>
+		else
+			su - <%= instance_owner %> -c "CATALINA_PID=$PIDFILE <%= instance_startup %>"
+		fi
+		log_end_msg 0
+	fi
+}
+
+stop_tomcat-<%= instance_name %>() {
+	log_daemon_msg "Stopping $DESC"
+	if [ $(id -n -u) = "<%= instance_owner %>" ]; then
+		CATALINA_PID=$PIDFILE <%= instance_shutdown %>
+	else
+		su - <%= instance_owner %> -c "CATALINA_PID=$PIDFILE <%= instance_shutdown %>"
+	fi
+	ps -p `cat $PIDFILE 2>>/dev/null` >> /dev/null 2>&1
+	RUNNING=$?
+	while [ $RUNNING -eq 0 ]; do
+		log_daemon_msg "Tomcat <%= instance_name %> is still running..."
+		sleep 1
+		ps -p `cat $PIDFILE 2>>/dev/null` >> /dev/null 2>&1
+		RUNNING=$?
+	done
+	rm -f $PIDFILE
+	mv <%= instance_logdir %>/catalina.out <%= instance_logdir %>/catalina.out-$(date +%Y%m%d%H%M)
+	log_end_msg 0
+}
+
+status_tomcat-<%= instance_name %>() {
+	ps -ef | grep -q $(cat $PIDFILE) > /dev/null 2>&1
+	RETCODE=$?
+	if [ $RETCODE -eq 0 ]; then
+		log_daemon_msg "$DESC is running"
+		log_end_msg 0
+	else
+		log_daemon_msg "$DESC is not running"
+		log_end_msg 1
+	fi
+}
+
+case "$1" in
+    start)
+	start_tomcat-<%= instance_name %>
+	;;
+    stop)
+	stop_tomcat-<%= instance_name %>
+	;;
+    status)
+	status_tomcat-<%= instance_name %>
+	;;
+    restart|force-reload)
+	stop_tomcat-<%= instance_name %>
+	sleep 1
+	start_tomcat-<%= instance_name %>
+	;;
+  *)
+	echo "Usage: $0 {start|stop|status|restart|force-reload}" >&2
+	exit 1
+	;;
+esac

@@ -1,0 +1,9 @@
+#!/bin/sh
+# File Managed by Puppet
+set -e
+
+# compress catalina.out-123456789012 log files
+for FILE in `find <%= instance_logdir %> -type f | grep -E "catalina.out-[0-9]{12}$"`; do
+  echo "Compressing $FILE..."
+  bzip2 $FILE
+done
