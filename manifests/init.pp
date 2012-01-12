@@ -230,65 +230,64 @@ class tomcat (
   $protocol          = $tomcat::params::protocol
   ) inherits tomcat::params {
 
-  validate_bool(  $source_dir_purge ,
-                  $absent ,
-                  $disable ,
-                  $disableboot ,
-                  $monitor ,
-                  $puppi ,
-                  $firewall ,
-                  $debug ,
-                  $audit_only )
+  $bool_source_dir_purge=any2bool($source_dir_purge)
+  $bool_absent=any2bool($absent)
+  $bool_disable=any2bool($disable)
+  $bool_disableboot=any2bool($disableboot)
+  $bool_monitor=any2bool($monitor)
+  $bool_puppi=any2bool($puppi)
+  $bool_firewall=any2bool($firewall)
+  $bool_debug=any2bool($debug)
+  $bool_audit_only=any2bool($audit_only)
 
   ### Definition of some variables used in the module
-  $manage_package = $tomcat::absent ? {
+  $manage_package = $tomcat::bool_absent ? {
     true  => 'absent',
     false => 'present',
   }
 
-  $manage_service_enable = $tomcat::disableboot ? {
+  $manage_service_enable = $tomcat::bool_disableboot ? {
     true    => false,
-    default => $tomcat::disable ? {
+    default => $tomcat::bool_disable ? {
       true    => false,
-      default => $tomcat::absent ? {
+      default => $tomcat::bool_absent ? {
         true  => false,
         false => true,
       },
     },
   }
 
-  $manage_service_ensure = $tomcat::disable ? {
+  $manage_service_ensure = $tomcat::bool_disable ? {
     true    => 'stopped',
-    default =>  $tomcat::absent ? {
+    default =>  $tomcat::bool_absent ? {
       true    => 'stopped',
       default => 'running',
     },
   }
 
-  $manage_file = $tomcat::absent ? {
+  $manage_file = $tomcat::bool_absent ? {
     true    => 'absent',
     default => 'present',
   }
 
-  # If $tomcat::disable == true we dont check tomcat on the local system
-  if $tomcat::absent == true or $tomcat::disable == true or $tomcat::disableboot == true {
+  if $tomcat::bool_absent == true or $tomcat::bool_disable == true or $tomcat::bool_disableboot == true {
     $manage_monitor = false
   } else {
     $manage_monitor = true
   }
 
-  if $tomcat::absent == true or $tomcat::disable == true {
+  if $tomcat::bool_absent == true or $tomcat::bool_disable == true {
     $manage_firewall = false
   } else {
     $manage_firewall = true
   }
 
-  $manage_audit = $tomcat::audit_only ? {
+  $manage_audit = $tomcat::bool_audit_only ? {
     true  => 'all',
     false => undef,
   }
 
-  $manage_file_replace = $tomcat::audit_only ? {
+  $manage_file_replace = $tomcat::bool_audit_only ? {
     true  => false,
     false => true,
   }
@@ -355,7 +354,7 @@ class tomcat (
 
 
   ### Provide puppi data, if enabled ( puppi => true )
-  if $tomcat::puppi == true {
+  if $tomcat::bool_puppi == true {
     $puppivars=get_class_args()
     file { 'puppi_tomcat':
       ensure  => $tomcat::manage_file,
@@ -370,7 +369,7 @@ class tomcat (
 
 
   ### Service monitoring, if enabled ( monitor => true )
-  if $tomcat::monitor == true {
+  if $tomcat::bool_monitor == true {
     monitor::port { "tomcat_${tomcat::protocol}_${tomcat::port}":
       protocol => $tomcat::protocol,
       port     => $tomcat::port,
@@ -389,7 +388,7 @@ class tomcat (
 
 
   ### Firewall management, if enabled ( firewall => true )
-  if $tomcat::firewall == true {
+  if $tomcat::bool_firewall == true {
     firewall { "tomcat_${tomcat::protocol}_${tomcat::port}":
       source      => $tomcat::firewall_source,
       destination => $tomcat::firewall_destination,
@@ -404,7 +403,7 @@ class tomcat (
 
 
   ### Debugging, if enabled ( debug => true )
-  if $tomcat::debug == true {
+  if $tomcat::bool_debug == true {
     file { 'debug_tomcat':
       ensure  => $tomcat::manage_file,
       path    => "${settings::vardir}/debug-tomcat",
