@@ -99,18 +99,19 @@ define tomcat::instance (
 
   # Create instance (First we install or create the tomcat-instance-create script)
   case $::operatingsystem {
-    debian,ubuntu {
+    debian,ubuntu: {
       package { "${tomcat::params::pkgver}-user":
         ensure => present,
       }
     }
-    redhat,centos,scientific {
+    redhat,centos,scientific: {
       file { "/usr/bin/tomcat-instance-create":
         ensure  => present,
         mode    => '0775',
         owner   => 'root',
         group   => 'root',
         content => template('tomcat/tomcat-instance-create.erb'),
+      }
     }
   }
 
