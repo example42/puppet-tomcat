@@ -19,7 +19,7 @@
 #   Can be defined also by the (top scope) variable $tomcat_source
 #
 # [*source_dir*]
-#   If defined, the whole tomcat configuration direrctory content is retrieved
+#   If defined, the whole tomcat configuration directory content is retrieved
 #   recursively from the specified source
 #   (source => $source_dir , recurse => true)
 #   Can be defined also by the (top scope) variable $tomcat_source_dir
