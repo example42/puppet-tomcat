@@ -55,7 +55,7 @@ define tomcat::instance (
   }
 
   # AJP proxy port - Used in server.xml-default template
-  # Note: YOU MUST explicitely define a template name in $serverxmltemplate to use one 
+  # Note: YOU MUST explicitely define a template name in $serverxmltemplate to use one
   # By default the script that creates an instance doesn't set the ajp port
 
   # CATALINA BASE
@@ -91,7 +91,7 @@ define tomcat::instance (
   $instance_create_exec = $::operatingsystem ? {
     /(?i:Debian|Ubuntu)/           => $tomcat::tomcat_version ? {
       '7'     => "chown ${instance_owner}:${instance_group} ${basedir} && su - ${instance_owner} -c '/usr/bin/tomcat7-instance-create -p ${httpport} -c ${controlport} -w ${magicword} ${instance_path}' && chown ${basedir_owner}:${basedir_group} ${basedir}",
-     '6'      => "chown ${instance_owner}:${instance_group} ${basedir} && su - ${instance_owner} -c '/usr/bin/tomcat6-instance-create -p ${httpport} -c ${controlport} -w ${magicword} ${instance_path}' && chown ${basedir_owner}:${basedir_group} ${basedir}",
+      '6'     => "chown ${instance_owner}:${instance_group} ${basedir} && su - ${instance_owner} -c '/usr/bin/tomcat6-instance-create -p ${httpport} -c ${controlport} -w ${magicword} ${instance_path}' && chown ${basedir_owner}:${basedir_group} ${basedir}",
       '5'     => "chown ${instance_owner}:${instance_group} ${basedir} && su - ${instance_owner} -c '/usr/bin/tomcat5-instance-create -p ${httpport} -c ${controlport} -w ${magicword} ${instance_path}' && chown ${basedir_owner}:${basedir_group} ${basedir}",
     },
     /(?i:CentOS|RedHat|Scientific)/ => "chown ${instance_owner}:${instance_group} ${basedir} && su - ${instance_owner} -c '/usr/bin/tomcat-instance-create -p ${httpport} -c ${controlport} -w ${magicword} ${instance_path}' && chown ${basedir_owner}:${basedir_group} ${basedir}",
@@ -311,7 +311,7 @@ define tomcat::instance (
     }
   }
 
-  # Compress instance logs 
+  # Compress instance logs
   file { "instance_tomcat_logCompressor.sh_${instance_name}":
     ensure  => present,
     path    => $instance_logCompressor,
@@ -337,7 +337,7 @@ define tomcat::instance (
       tool     => $monitor_tool,
     }
 
-    monitor::port { "tomcat_tcp_$httpport": 
+    monitor::port { "tomcat_tcp_$httpport":
       protocol => 'tcp',
       port     => $httpport,
       target   => $fqdn,

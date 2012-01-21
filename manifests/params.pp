@@ -14,7 +14,7 @@
 #
 class tomcat::params {
 
-  # Let's deal with versions madness
+  # Let's deal with versions madness
   $pkgver = $::operatingsystem ? {
     ubuntu                          => 'tomcat6',
     debian                          => $stdlib42::osver ? {

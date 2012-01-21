@@ -1,4 +1,4 @@
-# Class: tomcat
+# = Class: tomcat
 #
 # This is the main tomcat class
 #

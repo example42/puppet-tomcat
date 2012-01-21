@@ -12,7 +12,7 @@
 class tomcat::spec inherits tomcat {
 
   # This just a test to override the arguments of an existing resource
-  # Note that you can achieve this same result with just:
+  # Note that you can achieve this same result with just:
   # class { "tomcat": template => "tomcat/spec.erb" }
 
   File['tomcat.conf'] {
