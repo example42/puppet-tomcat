@@ -355,15 +355,11 @@ class tomcat (
 
   ### Provide puppi data, if enabled ( puppi => true )
   if $tomcat::bool_puppi == true {
-    $puppivars=get_class_args()
-    file { 'puppi_tomcat':
-      ensure  => $tomcat::manage_file,
-      path    => "${settings::vardir}/puppi/tomcat",
-      mode    => '0644',
-      owner   => 'root',
-      group   => 'root',
-      require => Class['puppi'],
-      content => inline_template('<%= puppivars.to_yaml %>'),
+    $classvars=get_class_args()
+    puppi::ze { 'tomcat':
+      ensure    => $tomcat::manage_file,
+      variables => $classvars,
+      helper    => $tomcat::puppi_helper,
     }
   }
 
