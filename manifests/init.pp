@@ -40,6 +40,11 @@
 #   An hash of custom options to be used in templates for arbitrary settings.
 #   Can be defined also by the (top scope) variable $tomcat_options
 #
+# [*service_autorestart*]
+#   Automatically restarts the tomcat service when there is a change in
+#   configuration files. Default: true, Set to false if you don't want to
+#   automatically restart the service.
+#
 # [*absent*]
 #   Set to 'true' to remove package(s) installed by module
 #   Can be defined also by the (top scope) variable $tomcat_absent
@@ -66,7 +71,7 @@
 #
 # [*monitor_target*]
 #   The Ip address or hostname to use as a target for monitoring tools.
-#   Default is the fact $ip_address
+#   Default is the fact $ipaddress
 #   Can be defined also by the (top scope) variables $tomcat_monitor_target
 #   and $monitor_target
 #
@@ -133,8 +138,11 @@
 #   The name of tomcat process
 #
 # [*process_args*]
-#   The name of tomcat arguments.
+#   The name of tomcat arguments. Used by puppi and monitor.
 #   Used only in case the tomcat process name is generic (java, ruby...)
+#
+# [*process_user*]
+#   The name of the user tomcat runs with. Used by puppi and monitor.
 #
 # [*config_dir*]
 #   Main configuration directory. Used by puppi
@@ -191,46 +199,49 @@
 #   Alessandro Franceschi <al@lab42.it/>
 #
 class tomcat (
-  $my_class          = $tomcat::params::my_class,
-  $source            = $tomcat::params::source,
-  $source_dir        = $tomcat::params::source_dir,
-  $source_dir_purge  = $tomcat::params::source_dir_purge,
-  $template          = $tomcat::params::template,
-  $options           = $tomcat::params::options,
-  $absent            = $tomcat::params::absent,
-  $disable           = $tomcat::params::disable,
-  $disableboot       = $tomcat::params::disableboot,
-  $monitor           = $tomcat::params::monitor,
-  $monitor_tool      = $tomcat::params::monitor_tool,
-  $monitor_target    = $tomcat::params::monitor_target,
-  $puppi             = $tomcat::params::puppi,
-  $puppi_helper      = $tomcat::params::puppi_helper,
-  $firewall          = $tomcat::params::firewall,
-  $firewall_tool     = $tomcat::params::firewall_tool,
-  $firewall_src      = $tomcat::params::firewall_src,
-  $firewall_dst      = $tomcat::params::firewall_dst,
-  $debug             = $tomcat::params::debug,
-  $audit_only        = $tomcat::params::audit_only,
-  $package           = $tomcat::params::package,
-  $service           = $tomcat::params::service,
-  $service_status    = $tomcat::params::service_status,
-  $process           = $tomcat::params::process,
-  $process_args      = $tomcat::params::process_args,
-  $config_dir        = $tomcat::params::config_dir,
-  $config_file       = $tomcat::params::config_file,
-  $config_file_mode  = $tomcat::params::config_file_mode,
-  $config_file_owner = $tomcat::params::config_file_owner,
-  $config_file_group = $tomcat::params::config_file_group,
-  $config_file_init  = $tomcat::params::config_file_init,
-  $pid_file          = $tomcat::params::pid_file,
-  $data_dir          = $tomcat::params::data_dir,
-  $log_dir           = $tomcat::params::log_dir,
-  $log_file          = $tomcat::params::log_file,
-  $port              = $tomcat::params::port,
-  $protocol          = $tomcat::params::protocol
+  $my_class            = params_lookup( 'my_class' ),
+  $source              = params_lookup( 'source' ),
+  $source_dir          = params_lookup( 'source_dir' ),
+  $source_dir_purge    = params_lookup( 'source_dir_purge' ),
+  $template            = params_lookup( 'template' ),
+  $service_autorestart = params_lookup( 'service_autorestart' , 'global' ),
+  $options             = params_lookup( 'options' ),
+  $absent              = params_lookup( 'absent' ),
+  $disable             = params_lookup( 'disable' ),
+  $disableboot         = params_lookup( 'disableboot' ),
+  $monitor             = params_lookup( 'monitor' , 'global' ),
+  $monitor_tool        = params_lookup( 'monitor_tool' , 'global' ),
+  $monitor_target      = params_lookup( 'monitor_target' , 'global' ),
+  $puppi               = params_lookup( 'puppi' , 'global' ),
+  $puppi_helper        = params_lookup( 'puppi_helper' , 'global' ),
+  $firewall            = params_lookup( 'firewall' , 'global' ),
+  $firewall_tool       = params_lookup( 'firewall_tool' , 'global' ),
+  $firewall_src        = params_lookup( 'firewall_src' , 'global' ),
+  $firewall_dst        = params_lookup( 'firewall_dst' , 'global' ),
+  $debug               = params_lookup( 'debug' , 'global' ),
+  $audit_only          = params_lookup( 'audit_only' , 'global' ),
+  $package             = params_lookup( 'package' ),
+  $service             = params_lookup( 'service' ),
+  $service_status      = params_lookup( 'service_status' ),
+  $process             = params_lookup( 'process' ),
+  $process_args        = params_lookup( 'process_args' ),
+  $process_user        = params_lookup( 'process_user' ),
+  $config_dir          = params_lookup( 'config_dir' ),
+  $config_file         = params_lookup( 'config_file' ),
+  $config_file_mode    = params_lookup( 'config_file_mode' ),
+  $config_file_owner   = params_lookup( 'config_file_owner' ),
+  $config_file_group   = params_lookup( 'config_file_group' ),
+  $config_file_init    = params_lookup( 'config_file_init' ),
+  $pid_file            = params_lookup( 'pid_file' ),
+  $data_dir            = params_lookup( 'data_dir' ),
+  $log_dir             = params_lookup( 'log_dir' ),
+  $log_file            = params_lookup( 'log_file' ),
+  $port                = params_lookup( 'port' ),
+  $protocol            = params_lookup( 'protocol' )
   ) inherits tomcat::params {
 
   $bool_source_dir_purge=any2bool($source_dir_purge)
+  $bool_service_autorestart=any2bool($service_autorestart)
   $bool_absent=any2bool($absent)
   $bool_disable=any2bool($disable)
   $bool_disableboot=any2bool($disableboot)
@@ -263,6 +274,11 @@ class tomcat (
       true    => 'stopped',
       default => 'running',
     },
+  }
+
+  $manage_service_autorestart = $tomcat::bool_service_autorestart ? {
+    true    => 'Service[tomcat]',
+    false   => undef,
   }
 
   $manage_file = $tomcat::bool_absent ? {
@@ -315,7 +331,6 @@ class tomcat (
     hasstatus  => $tomcat::service_status,
     pattern    => $tomcat::process,
     require    => Package['tomcat'],
-    subscribe  => File['tomcat.conf'],
   }
 
   file { 'tomcat.conf':
@@ -325,7 +340,7 @@ class tomcat (
     owner   => $tomcat::config_file_owner,
     group   => $tomcat::config_file_group,
     require => Package['tomcat'],
-    notify  => Service['tomcat'],
+    notify  => $tomcat::manage_service_autorestart,
     source  => $tomcat::manage_file_source,
     content => $tomcat::manage_file_content,
     replace => $tomcat::manage_file_replace,
@@ -337,10 +352,11 @@ class tomcat (
     file { 'tomcat.dir':
       ensure  => directory,
       path    => $tomcat::config_dir,
-      require => Class['tomcat::install'],
-      source  => $source_dir,
+      require => Package['tomcat'],
+      notify  => $tomcat::manage_service_autorestart,
+      source  => $tomcat::source_dir,
       recurse => true,
-      purge   => $source_dir_purge,
+      purge   => $tomcat::source_dir_purge,
       replace => $tomcat::manage_file_replace,
       audit   => $tomcat::manage_audit,
     }
@@ -369,7 +385,7 @@ class tomcat (
     monitor::port { "tomcat_${tomcat::protocol}_${tomcat::port}":
       protocol => $tomcat::protocol,
       port     => $tomcat::port,
-      target   => $tomcat::params::monitor_target,
+      target   => $tomcat::monitor_target,
       tool     => $tomcat::monitor_tool,
       enable   => $tomcat::manage_monitor,
     }
@@ -377,6 +393,8 @@ class tomcat (
       process  => $tomcat::process,
       service  => $tomcat::service,
       pidfile  => $tomcat::pid_file,
+      user     => $tomcat::process_user,
+      argument => $tomcat::process_args,
       tool     => $tomcat::monitor_tool,
       enable   => $tomcat::manage_monitor,
     }

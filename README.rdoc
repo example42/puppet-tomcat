@@ -1,57 +1,21 @@
-== Puppet module: tomcat
+= Puppet module: tomcat
 
 This is a Puppet tomcat module from the second generation of Example42 Puppet Modules.
 
-Made by Alessandro Franceschi / Lab42 - http://www.example42.com
+Made by Alessandro Franceschi / Lab42
+
+Official site: http://www.example42.com
+
+Official git repository: http://github.com/example42/puppet-tomcat
 
 Released under the terms of Apache 2 License.
 
-Check Modulefile for dependencies.
+This module requires functions provided by the Example42 Puppi module.
 
-=== GENERAL USAGE
-This module can be used in 2 ways:
+For detailed info about the logic and usage patterns of Example42 modules read README.usage on Example42 main modules set.
 
-* With the old style "Set variables and include class" pattern:
+== USAGE - Basic management
 
-        $tomcat_template = "example42/tomcat/tomcat.conf.erb"
-        include tomcat
-
-* As a parametrized class:
-
-        class { "tomcat":
-          template => "example42/tomcat/tomcat.conf.erb",
-        }
-
-You can even, under some degrees, mix these two patterns.
-
-You can for example set general top scope variables that affect all your parametrized classes:
-
-        $puppi = true
-        $monitor = true
-        $monitor_tool = [ "nagios" , "munin" , "puppi" ]
-        class { "tomcat":
-          template => "example42/tomcat/tomcat.conf.erb",
-        }
-        
-The above example has the same effect of:
-
-        class { "tomcat":
-          template => "example42/tomcat/tomcat.conf.erb",
-          puppi        => true,
-          monitor      => true,
-          monitor_tool => [ "nagios" , "munin" , "puppi" ],
-        }
-
-Note that if you use the "Set variables and include class" pattern you can define variables only
-at the top level scope or in a ENC (External Node Classifer) like Puppet Dashboard, Puppet Enterprise Console or The Foreman.
-
-Below you have an overview of the most important module's parameters (you can mix and aggregate them).
-
-The examples use parametrized classes, but for all the parameters you can set a $tomcat_ top scope variable.
-
-For example, the variable "$tomcat_absent" is equivant to the "absent =>" parameter.
-
-=== USAGE - Basic management
 * Install tomcat with default settings
 
         class { "tomcat": }
@@ -81,7 +45,7 @@ For example, the variable "$tomcat_absent" is equivant to the "absent =>" parame
         }
 
 
-=== USAGE - Overrides and Customizations
+== USAGE - Overrides and Customizations
 * Use custom sources for main config file 
 
         class { "tomcat":
@@ -120,7 +84,7 @@ For example, the variable "$tomcat_absent" is equivant to the "absent =>" parame
         }
 
 
-=== USAGE - Example42 extensions management 
+== USAGE - Example42 extensions management 
 * Activate puppi (recommended, but disabled by default)
   Note that this option requires the usage of Example42 puppi module
 
@@ -153,5 +117,4 @@ For example, the variable "$tomcat_absent" is equivant to the "absent =>" parame
           firewall_src  => "10.42.0.0/24",
           firewall_dst  => "$ipaddress_eth0",
         }
-
 
