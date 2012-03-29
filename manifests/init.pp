@@ -404,8 +404,8 @@ class tomcat (
   ### Firewall management, if enabled ( firewall => true )
   if $tomcat::bool_firewall == true {
     firewall { "tomcat_${tomcat::protocol}_${tomcat::port}":
-      source      => $tomcat::firewall_source,
-      destination => $tomcat::firewall_destination,
+      source      => $tomcat::firewall_src,
+      destination => $tomcat::firewall_dst,
       protocol    => $tomcat::protocol,
       port        => $tomcat::port,
       action      => 'allow',
