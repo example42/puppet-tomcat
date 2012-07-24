@@ -356,7 +356,7 @@ class tomcat (
       notify  => $tomcat::manage_service_autorestart,
       source  => $tomcat::source_dir,
       recurse => true,
-      purge   => $tomcat::source_dir_purge,
+      purge   => $tomcat::bool_source_dir_purge,
       replace => $tomcat::manage_file_replace,
       audit   => $tomcat::manage_audit,
     }
