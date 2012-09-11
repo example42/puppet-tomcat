@@ -14,17 +14,18 @@
 #
 class tomcat::params {
 
+  $osver = split($::operatingsystemrelease, '[.]')
   ### Application related parameters
 
   # Let's deal with versions madness
   $pkgver = $::operatingsystem ? {
     ubuntu                          => 'tomcat6',
-    debian                          => $stdlib42::osver ? {
+    debian                          => $osver[0] ? {
       5       => 'tomcat5.5',
       6       => 'tomcat6',
       default => 'tomcat6',
     },
-    /(?i:CentOS|RedHat|Scientific)/ => $stdlib42::osver ? {
+    /(?i:CentOS|RedHat|Scientific)/ => $osver[0] ? {
       5       => 'tomcat5',
       6       => 'tomcat6',
       default => 'tomcat6',
