@@ -219,7 +219,7 @@ define tomcat::instance (
     group   => $instance_group,
     require => Exec["instance_tomcat_${instance_name}"],
     notify  => Service["tomcat-${instance_name}"],
-    source  => template("$setenvshtemplate"),
+    content => template("$setenvshtemplate"),
   }
 
   # Ensure params presence
@@ -230,7 +230,7 @@ define tomcat::instance (
     owner   => $instance_owner,
     group   => $instance_group,
     require => Exec["instance_tomcat_${instance_name}"],
-    source  => template("$paramstemplate"),
+    content => template("$paramstemplate"),
   }
 
   # Ensure startup.sh presence
