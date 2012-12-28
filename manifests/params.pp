@@ -14,18 +14,17 @@
 #
 class tomcat::params {
 
-  $osver = split($::operatingsystemrelease, '[.]')
   ### Application related parameters
 
   # Let's deal with versions madness
   $pkgver = $::operatingsystem ? {
     ubuntu                          => 'tomcat6',
-    debian                          => $osver[0] ? {
+    debian                          => $lsbmajdistrelease ? {
       5       => 'tomcat5.5',
       6       => 'tomcat6',
       default => 'tomcat6',
     },
-    /(?i:CentOS|RedHat|Scientific)/ => $osver[0] ? {
+    /(?i:CentOS|RedHat|Scientific)/ => $lsbmajdistrelease ? {
       5       => 'tomcat5',
       6       => 'tomcat6',
       default => 'tomcat6',
@@ -56,11 +55,11 @@ class tomcat::params {
   }
 
   $config_dir = $::operatingsystem ? {
-    default => "/etc/$tomcat::params::pkgver",
+    default => "/etc/${tomcat::params::pkgver}",
   }
 
   $config_file = $::operatingsystem ? {
-    default => "/etc/$tomcat::params::pkgver/server.xml",
+    default => "/etc/${tomcat::params::pkgver}/server.xml",
   }
 
   $config_file_mode = $::operatingsystem ? {
@@ -76,24 +75,24 @@ class tomcat::params {
   }
 
   $config_file_init = $::operatingsystem ? {
-    /(?i:Debian|Ubuntu|Mint)/ => "/etc/default/$tomcat::params::pkgver",
-    default                   => "/etc/sysconfig/$tomcat::params::pkgver",
+    /(?i:Debian|Ubuntu|Mint)/ => "/etc/default/${tomcat::params::pkgver}",
+    default                   => "/etc/sysconfig/${tomcat::params::pkgver}",
   }
 
   $pid_file = $::operatingsystem ? {
-    default => "/var/run/$tomcat::params::pkgver.pid",
+    default => "/var/run/${tomcat::params::pkgver}.pid",
   }
 
   $data_dir = $::operatingsystem ? {
-    default => "/var/lib/$tomcat::params::pkgver/webapps",
+    default => "/var/lib/${tomcat::params::pkgver}/webapps",
   }
 
   $log_dir = $::operatingsystem ? {
-    default => "/var/log/$tomcat::params::pkgver",
+    default => "/var/log/${tomcat::params::pkgver}",
   }
 
   $log_file = $::operatingsystem ? {
-    default => "/var/log/$tomcat::params::pkgver/catalina.out",
+    default => "/var/log/${tomcat::params::pkgver}/catalina.out",
   }
 
   $port = '8080'
