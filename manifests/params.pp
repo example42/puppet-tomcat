@@ -29,6 +29,7 @@ class tomcat::params {
       6       => 'tomcat6',
       default => 'tomcat6',
     },
+    /(?i:SLES|OpenSuSe)/            => 'tomcat6',
     default                         => 'tomcat',
   }
 
