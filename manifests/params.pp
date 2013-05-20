@@ -33,6 +33,9 @@ class tomcat::params {
     default                         => 'tomcat',
   }
 
+  # Todo: What to do when $pkgver = 'tomcat' without any number?
+  $version = inline_template("<%= '$pkgver'.scan(/\d/).first %>")
+
   ### Application related parameters
 
   $package = $tomcat::params::pkgver
@@ -75,10 +78,7 @@ class tomcat::params {
     default => 'root',
   }
 
-  $config_file_init = $::operatingsystem ? {
-    /(?i:Debian|Ubuntu|Mint)/ => "/etc/default/${tomcat::params::pkgver}",
-    default                   => "/etc/sysconfig/${tomcat::params::pkgver}",
-  }
+  $config_file_init = "/etc/init.d/${tomcat::params::pkgver}"
 
   $pid_file = $::operatingsystem ? {
     default => "/var/run/${tomcat::params::pkgver}.pid",
