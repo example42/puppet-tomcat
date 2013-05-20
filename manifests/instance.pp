@@ -1,14 +1,81 @@
 # Define: tomcat::instance
-# NOTE: Work in progress. Still doesn't work
+# NOTE: Work in progress. Has only been tested limited under Ubuntu 12.04
 #
 # Tomcat user instance
+#
+# == Parameters
+#
+# Standard class parameters
+# Define the general class behaviour and customizations
+#
+# [*dirmode*]
+#
+# [*filemode*]
+#
+# [*owner*]
+#
+# [*group*]
+#
+# [*httpport*]
+#
+# [*controlport*]
+#
+# [*ajpport*]
+#
+# [*magicword*]
+#
+# [*backupsdir*]
+#
+# [*rundir*]
+#
+# [*logdir*]
+#
+# [*catalinaproperties*]
+#
+# [*inittemplate*]
+#
+# [*startupshtemplate*]
+#
+# [*shutdownshtemplate*]
+#
+# [*setenvshtemplate*]
+#
+# [*paramstemplate*]
+#
+# [*serverxmltemplate*]
+#
+# [*contextxmltemplate*]
+#
+# [*tomcatusersxmltemplate*]
+#
+# [*webxmltemplate*]
+#
+# [*tomcatuser*]
+#
+# [*tomcatpassword*]
+#
+# [*puppi*]
+#
+# [*monitor*]
+#
+# [*manager*]
+#
+# [*modjk_workers_file*]
+# The path of the mod_jk workers file to be generated.
+# Requires tomcat::mod_jk to be useful.
 #
 # Usage:
 # With standard template:
 # tomcat::instance  { "name": }
 #
+# Notes
+# =====
+#
+# AJP proxy port - Used in server.xml-default template
+# Note: YOU MUST explicitly define a template name in $serverxmltemplate to use one
+# By default the script that creates an instance doesn't set the ajp port
+#
 define tomcat::instance (
-  $basedir                = '/srv',
   $dirmode                = '0755',
   $filemode               = '0644',
   $owner                  = '',
@@ -34,10 +101,13 @@ define tomcat::instance (
   $tomcatpassword         = '',
   $puppi                  = true,
   $monitor                = true,
-  $manager                = false
+  $manager                = false,
+  $modjk_workers_file     = '',
   ) {
 
   require tomcat::params
+
+  $tomcat_version = $tomcat::params::version
 
   # Application name, required
   $instance_name = $name
@@ -54,12 +124,8 @@ define tomcat::instance (
     default => $group,
   }
 
-  # AJP proxy port - Used in server.xml-default template
-  # Note: YOU MUST explicitely define a template name in $serverxmltemplate to use one
-  # By default the script that creates an instance doesn't set the ajp port
-
   # CATALINA BASE
-  $instance_path = "${basedir}/${instance_name}"
+  $instance_path = "/var/lib/${tomcat::params::pkgver}-${instance_name}"
 
   # Backups dir
   $instance_backupsdir = $backupsdir ? {
@@ -89,19 +155,22 @@ define tomcat::instance (
   $instance_logCompressor = "${instance_path}/bin/logCompressor.sh"
 
   $instance_create_exec = $::operatingsystem ? {
-    /(?i:Debian|Ubuntu)/           => $tomcat::tomcat_version ? {
-      '7'     => "chown ${instance_owner}:${instance_group} ${basedir} && su - ${instance_owner} -c '/usr/bin/tomcat7-instance-create -p ${httpport} -c ${controlport} -w ${magicword} ${instance_path}' && chown ${basedir_owner}:${basedir_group} ${basedir}",
-      '6'     => "chown ${instance_owner}:${instance_group} ${basedir} && su - ${instance_owner} -c '/usr/bin/tomcat6-instance-create -p ${httpport} -c ${controlport} -w ${magicword} ${instance_path}' && chown ${basedir_owner}:${basedir_group} ${basedir}",
-      '5'     => "chown ${instance_owner}:${instance_group} ${basedir} && su - ${instance_owner} -c '/usr/bin/tomcat5-instance-create -p ${httpport} -c ${controlport} -w ${magicword} ${instance_path}' && chown ${basedir_owner}:${basedir_group} ${basedir}",
+    /(?i:Debian|Ubuntu)/           => $tomcat_version ? {
+      '7'     => "/usr/bin/tomcat7-instance-create -p ${httpport} -c ${controlport} -w ${magicword} ${instance_path} && chown -R ${instance_owner}:${instance_group} ${instance_path}",
+      '6'     => "/usr/bin/tomcat6-instance-create -p ${httpport} -c ${controlport} -w ${magicword} ${instance_path} && chown -R ${instance_owner}:${instance_group} ${instance_path}",
+      '5'     => "/usr/bin/tomcat5-instance-create -p ${httpport} -c ${controlport} -w ${magicword} ${instance_path} && chown -R ${instance_owner}:${instance_group} ${instance_path}",
     },
-    /(?i:CentOS|RedHat|Scientific)/ => "chown ${instance_owner}:${instance_group} ${basedir} && su - ${instance_owner} -c '/usr/bin/tomcat-instance-create -p ${httpport} -c ${controlport} -w ${magicword} ${instance_path}' && chown ${basedir_owner}:${basedir_group} ${basedir}",
+    /(?i:CentOS|RedHat|Scientific)/ => "/usr/bin/tomcat-instance-create -p ${httpport} -c ${controlport} -w ${magicword} ${instance_path} && chown ${instance_owner}:${instance_group} ${instance_path}",
   }
 
   # Create instance (First we install or create the tomcat-instance-create script)
   case $::operatingsystem {
     debian,ubuntu: {
-      package { "${tomcat::params::pkgver}-user":
-        ensure => present,
+      if (!defined(Package["${tomcat::params::pkgver}-user"])) {
+        package { "${tomcat::params::pkgver}-user":
+          ensure => present,
+          before => Exec["instance_tomcat_${instance_name}"],
+        }
       }
     }
     redhat,centos,scientific: {
@@ -111,23 +180,23 @@ define tomcat::instance (
         owner   => 'root',
         group   => 'root',
         content => template('tomcat/tomcat-instance-create.erb'),
+        before  => Exec["instance_tomcat_${instance_name}"]
       }
     }
   }
 
-
   exec { "instance_tomcat_${instance_name}":
     command => $instance_create_exec,
     creates => "${instance_path}/webapps",
-    require => Package["tomcat"],
+    require => [ Package['tomcat'], Group[$instance_owner] ],
   }
 
   if $manager == true {
     include tomcat::manager
     exec { "tomcat-manager-${instance_name}":
-        command => "cp -a /usr/share/tomcat6-admin/manager/ ${basedir}/${instance_name}/webapps && chown -R ${instance_owner}:${instance_group} ${basedir}/${instance_name}/webapps/manager",
-        creates => "${basedir}/${instance_name}/webapps/manager",
-        require  => Class["tomcat::manager"],
+        command => "cp -a /usr/share/tomcat6-admin/manager/ ${instance_path}/webapps && chown -R ${instance_owner}:${instance_group} ${instance_path}/webapps/manager",
+        creates => "${instance_path}/webapps/manager",
+        require  => [ Class["tomcat::manager"], Group[$instance_owner] ],
       }
   }
 
@@ -162,9 +231,9 @@ define tomcat::instance (
   }
 
   # Running service
-  service {"tomcat-${instance_name}":
+  service { "tomcat-${instance_name}":
     ensure     => running,
-    name       => "tomcat-${instance_name}",
+    name       => "${tomcat::params::pkgver}-${instance_name}",
     enable     => true,
     pattern    => $instance_name,
     hasrestart => true,
@@ -185,11 +254,18 @@ define tomcat::instance (
     content => template("$inittemplate"),
   }
 
+  file { "${instance_path}/conf/policy.d/":
+    ensure => directory,
+    owner  => $instance_owner,
+    group  => $instance_group,
+    require => Exec[ "instance_tomcat_${instance_name}" ]
+  }
+
   # catalina.properties is defined only if $catalinaproperties is set
   if $catalinaproperties != '' {
     file { "instance_tomcat_catalina.properties_${instance_name}":
       ensure  => present,
-      path    => "${basedir}/${instance_name}/conf/catalina.properties",
+      path    => "${instance_path}/conf/catalina.properties",
       mode    => $filemode,
       owner   => $instance_owner,
       group   => $instance_group,
@@ -202,7 +278,7 @@ define tomcat::instance (
   # Ensure logging.properties presence
   file { "instance_tomcat_logging.properties_${instance_name}":
     ensure  => present,
-    path    => "${basedir}/${instance_name}/conf/logging.properties",
+    path    => "${instance_path}/conf/logging.properties",
     mode    => $filemode,
     owner   => $instance_owner,
     group   => $instance_group,
@@ -213,7 +289,7 @@ define tomcat::instance (
   # Ensure setenv.sh presence
   file { "instance_tomcat_setenv.sh_${instance_name}":
     ensure  => present,
-    path    => "${basedir}/${instance_name}/bin/setenv.sh",
+    path    => "${instance_path}/bin/setenv.sh",
     mode    => '0755',
     owner   => $instance_owner,
     group   => $instance_group,
@@ -225,7 +301,7 @@ define tomcat::instance (
   # Ensure params presence
   file { "instance_tomcat_params_${instance_name}":
     ensure  => present,
-    path    => "${basedir}/${instance_name}/bin/params",
+    path    => "${instance_path}/bin/params",
     mode    => '0755',
     owner   => $instance_owner,
     group   => $instance_group,
@@ -259,7 +335,7 @@ define tomcat::instance (
   if $serverxmltemplate != '' {
     file { "instance_tomcat_server.xml_${instance_name}":
       ensure  => present,
-      path    => "${basedir}/${instance_name}/conf/server.xml",
+      path    => "${instance_path}/conf/server.xml",
       mode    => $filemode,
       owner   => $instance_owner,
       group   => $instance_group,
@@ -273,7 +349,7 @@ define tomcat::instance (
   if $contextxmltemplate != "" {
     file { "instance_tomcat_context.xml_${instance_name}":
       ensure  => present,
-      path    => "${basedir}/${instance_name}/conf/context.xml",
+      path    => "${instance_path}/conf/context.xml",
       mode    => $filemode,
       owner   => $instance_owner,
       group   => $instance_group,
@@ -287,7 +363,7 @@ define tomcat::instance (
   if $tomcatusersxmltemplate != '' {
     file { "instance_tomcat_tomcat-users.xml_${instance_name}":
       ensure  => present,
-      path    => "${basedir}/${instance_name}/conf/tomcat-users.xml",
+      path    => "${instance_path}/conf/tomcat-users.xml",
       mode    => $filemode,
       owner   => $instance_owner,
       group   => $instance_group,
@@ -301,7 +377,7 @@ define tomcat::instance (
   if $webxmltemplate != '' {
     file { "instance_tomcat_web.xml_${instance_name}":
       ensure  => present,
-      path    => "${basedir}/${instance_name}/conf/web.xml",
+      path    => "${instance_path}/conf/web.xml",
       mode    => $filemode,
       owner   => $instance_owner,
       group   => $instance_group,
@@ -321,13 +397,31 @@ define tomcat::instance (
     require => Exec["instance_tomcat_${instance_name}"],
     content => template('tomcat/logCompressor.sh.erb'),
   }
+
   file { "instance_tomcat_logCompressor.cron_${instance_name}":
     ensure  => present,
     path    => "/etc/cron.d/tomcat_logcompress_${instance_name}",
     content => template("tomcat/logCompressor.cron.erb"),
   }
 
-  if $monitor ==true {
+  if ($modjk_workers_file != '') {
+    include concat::setup
+
+    $normalized_modjk_workers_file = regsubst($modjk_workers_file, '/', '_', 'G')
+
+    concat::fragment{"instance_tomcat_modjk_${instance_name}":
+      target  => "${::concat::setup::concatdir}/instance_tomcat_modjk_${normalized_modjk_workers_file}",
+      content => template('tomcat/modjk.worker.properties'),
+    }
+
+    concat::fragment{"instance_tomcat_modjk_names_${instance_name}":
+      target  => "${::concat::setup::concatdir}/instance_tomcat_modjk_names_${normalized_modjk_workers_file}",
+      content => "${instance_name}_worker, ",
+    }
+
+  }
+
+  if $monitor == true {
     monitor::process { "tomcat-$instance_name":
       process  => 'java',
       argument => $instance_name,
@@ -347,13 +441,14 @@ define tomcat::instance (
   }
   if $puppi == true {
     puppi::log { "tomcat-${instance_name}":
-      log => "${basedir}/${instance_name}/logs/catalina.out",
+      log => "${instance_path}/logs/catalina.out",
     }
+
     puppi::info::instance { "tomcat-${instance_name}":
       servicename => "tomcat-${instance_name}",
       processname => $instance_name,
-      configdir   => "${basedir}/${instance_name}/conf/",
-      bindir      => "${basedir}/${instance_name}/bin/",
+      configdir   => "${instance_path}/conf/",
+      bindir      => "${instance_path}/bin/",
       pidfile     => "${instance_rundir}/tomcat-${instance_name}.pid",
       datadir     => "${instance_path}/webapps",
       logdir      => $instance_logdir,
