@@ -19,12 +19,12 @@ class tomcat::params {
   # Let's deal with versions madness
   $pkgver = $::operatingsystem ? {
     ubuntu                          => 'tomcat6',
-    debian                          => $lsbmajdistrelease ? {
+    debian                          => $::lsbmajdistrelease ? {
       5       => 'tomcat5.5',
       6       => 'tomcat6',
       default => 'tomcat6',
     },
-    /(?i:CentOS|RedHat|Scientific)/ => $lsbmajdistrelease ? {
+    /(?i:CentOS|RedHat|Scientific)/ => $::lsbmajdistrelease ? {
       5       => 'tomcat5',
       6       => 'tomcat6',
       default => 'tomcat6',
@@ -34,7 +34,7 @@ class tomcat::params {
   }
 
   # Todo: What to do when $pkgver = 'tomcat' without any number?
-  $version = inline_template("<%= '$pkgver'.scan(/\d/).first %>")
+  $version = inline_template("<%= '${pkgver}'.scan(/\d/).first %>")
 
   ### Application related parameters
 
