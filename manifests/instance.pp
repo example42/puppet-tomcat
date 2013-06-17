@@ -174,7 +174,7 @@ define tomcat::instance (
       }
     }
     redhat,centos,scientific: {
-      file { "/usr/bin/tomcat-instance-create":
+      file { '/usr/bin/tomcat-instance-create':
         ensure  => present,
         mode    => '0775',
         owner   => 'root',
@@ -196,7 +196,7 @@ define tomcat::instance (
     exec { "tomcat-manager-${instance_name}":
         command => "cp -a /usr/share/tomcat6-admin/manager/ ${instance_path}/webapps && chown -R ${instance_owner}:${instance_group} ${instance_path}/webapps/manager",
         creates => "${instance_path}/webapps/manager",
-        require  => [ Class["tomcat::manager"], Group[$instance_owner] ],
+        require => [ Class['tomcat::manager'], Group[$instance_owner] ],
       }
   }
 
@@ -237,7 +237,7 @@ define tomcat::instance (
     enable     => true,
     pattern    => $instance_name,
     hasrestart => true,
-    hasstatus  => "${tomcat::params::service_status}",
+    hasstatus  => $tomcat::params::service_status,
     require    => Exec["instance_tomcat_${instance_name}"],
     subscribe  => File["instance_tomcat_initd_${instance_name}"],
   }
@@ -251,13 +251,13 @@ define tomcat::instance (
     group   => 'root',
     require => Exec["instance_tomcat_${instance_name}"],
     notify  => Service["tomcat-${instance_name}"],
-    content => template("$inittemplate"),
+    content => template($inittemplate),
   }
 
   file { "${instance_path}/conf/policy.d/":
-    ensure => directory,
-    owner  => $instance_owner,
-    group  => $instance_group,
+    ensure  => directory,
+    owner   => $instance_owner,
+    group   => $instance_group,
     require => Exec[ "instance_tomcat_${instance_name}" ]
   }
 
@@ -271,7 +271,7 @@ define tomcat::instance (
       group   => $instance_group,
       require => Exec["instance_tomcat_${instance_name}"],
       notify  => Service["tomcat-${instance_name}"],
-      content => template("$catalinaproperties"),
+      content => template($catalinaproperties),
     }
   }
 
@@ -295,7 +295,7 @@ define tomcat::instance (
     group   => $instance_group,
     require => Exec["instance_tomcat_${instance_name}"],
     notify  => Service["tomcat-${instance_name}"],
-    content => template("$setenvshtemplate"),
+    content => template($setenvshtemplate),
   }
 
   # Ensure params presence
@@ -306,7 +306,7 @@ define tomcat::instance (
     owner   => $instance_owner,
     group   => $instance_group,
     require => Exec["instance_tomcat_${instance_name}"],
-    content => template("$paramstemplate"),
+    content => template($paramstemplate),
   }
 
   # Ensure startup.sh presence
@@ -317,7 +317,7 @@ define tomcat::instance (
     owner   => $instance_owner,
     group   => $instance_group,
     require => Exec["instance_tomcat_${instance_name}"],
-    content => template("$startupshtemplate"),
+    content => template($startupshtemplate),
   }
 
   # Ensure shutdown.sh presence
@@ -328,7 +328,7 @@ define tomcat::instance (
     owner   => $instance_owner,
     group   => $instance_group,
     require => Exec["instance_tomcat_${instance_name}"],
-    content => template("$shutdownshtemplate"),
+    content => template($shutdownshtemplate),
   }
 
   # server.xml is defined only if $serverxmltemplate is set
@@ -341,12 +341,12 @@ define tomcat::instance (
       group   => $instance_group,
       require => Exec["instance_tomcat_${instance_name}"],
       notify  => Service["tomcat-${instance_name}"],
-      content => template("$serverxmltemplate"),
+      content => template($serverxmltemplate),
     }
   }
 
   # context.xml is defined only if $contextxmltemplate is set
-  if $contextxmltemplate != "" {
+  if $contextxmltemplate != '' {
     file { "instance_tomcat_context.xml_${instance_name}":
       ensure  => present,
       path    => "${instance_path}/conf/context.xml",
@@ -355,7 +355,7 @@ define tomcat::instance (
       group   => $instance_group,
       require => Exec["instance_tomcat_${instance_name}"],
       notify  => Service["tomcat-${instance_name}"],
-      content => template("$contextxmltemplate"),
+      content => template($contextxmltemplate),
     }
   }
 
@@ -369,7 +369,7 @@ define tomcat::instance (
       group   => $instance_group,
       require => Exec["instance_tomcat_${instance_name}"],
       notify  => Service["tomcat-${instance_name}"],
-      content => template("$tomcatusersxmltemplate"),
+      content => template($tomcatusersxmltemplate),
     }
   }
 
@@ -383,7 +383,7 @@ define tomcat::instance (
       group   => $instance_group,
       require => Exec["instance_tomcat_${instance_name}"],
       notify  => Service["tomcat-${instance_name}"],
-      content => template("$webxmltemplate"),
+      content => template($webxmltemplate),
     }
   }
 
@@ -401,7 +401,7 @@ define tomcat::instance (
   file { "instance_tomcat_logCompressor.cron_${instance_name}":
     ensure  => present,
     path    => "/etc/cron.d/tomcat_logcompress_${instance_name}",
-    content => template("tomcat/logCompressor.cron.erb"),
+    content => template('tomcat/logCompressor.cron.erb'),
   }
 
   if ($modjk_workers_file != '') {
@@ -422,7 +422,7 @@ define tomcat::instance (
   }
 
   if $monitor == true {
-    monitor::process { "tomcat-$instance_name":
+    monitor::process { "tomcat-${instance_name}":
       process  => 'java',
       argument => $instance_name,
       service  => "tomcat-${instance_name}",
@@ -431,10 +431,10 @@ define tomcat::instance (
       tool     => $monitor_tool,
     }
 
-    monitor::port { "tomcat_tcp_$httpport":
+    monitor::port { "tomcat_tcp_${httpport}":
       protocol => 'tcp',
       port     => $httpport,
-      target   => $fqdn,
+      target   => $::fqdn,
       enable   => true,
       tool     => $monitor_tool,
     }

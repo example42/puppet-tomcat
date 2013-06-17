@@ -3,7 +3,7 @@
 # Configures Apache Httpd Mod_jk
 #
 # For now, all it does is create a workers.properties file that can be used
-# by mod_jk. Assembles based on the tomcat::instance's where the 
+# by mod_jk. Assembles based on the tomcat::instance's where the
 # $tomcat::instance::modjk_workers_file equals the $tomcat::mod_jk::workers_file
 #
 # == Parameters
@@ -18,7 +18,7 @@
 define tomcat::mod_jk (
   $workers_file,
 ) {
-  
+
   include concat::setup
 
   $normalized_workers_file = regsubst($workers_file, '/', '_', 'G')
@@ -27,20 +27,20 @@ define tomcat::mod_jk (
   concat{ $workers_file_frags:
     owner => root,
     group => root,
-    mode  => 644
+    mode  => '0644',
   }
 
   $names_file  = "${::concat::setup::concatdir}/instance_tomcat_modjk_names_${normalized_workers_file}"
   concat{ $names_file:
     owner => root,
     group => root,
-    mode  => 644
+    mode  => '0644',
   }
 
   file { $workers_file:
-    owner => root,
-    group => root,
-    mode  => 644,
+    owner   => root,
+    group   => root,
+    mode    => '0644',
     content => template('tomcat/modjk.workers.properties')
   }
 
