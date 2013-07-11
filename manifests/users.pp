@@ -20,28 +20,22 @@
 #
 # Notes
 # =====
-#
-# AJP proxy port - Used in server.xml-default template
-# Note: YOU MUST explicitly define a template name in $serverxmltemplate to use one
-# By default the script that creates an instance doesn't set the ajp port
-#
+
 define tomcat::users (
   $filemode               = '0640',
   $source		  ='',
   ) {
 
-  require tomcat::params
-
-  $tomcat_version = $tomcat::params::version
+  require tomcat
 
 
   file { "tomcat_users":
     ensure  => file,
-    path    => "${tomcat::params::config_dir}/tomcat-users.xml",
+    path    => "${tomcat::config_dir}/tomcat-users.xml",
     mode    => $filemode,
     source  => $source,
-    owner   => $tomcat::params::config_file_owner,
-    group   => $tomcat::params::config_file_group,
+    owner   => $tomcat::config_file_owner,
+    group   => $tomcat::config_file_group,
     require => Class['tomcat'],
   }
 
