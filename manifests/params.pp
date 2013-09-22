@@ -36,6 +36,8 @@ class tomcat::params {
   # Todo: What to do when $pkgver = 'tomcat' without any number?
   $version = inline_template("<%= '${pkgver}'.scan(/\d/).first %>")
 
+  $catalina_home = "/usr/share/${pkgver}"
+
   ### Application related parameters
 
   $package = $tomcat::params::pkgver

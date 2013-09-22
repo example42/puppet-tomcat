@@ -199,6 +199,7 @@
 #   Alessandro Franceschi <al@lab42.it/>
 #
 class tomcat (
+  $catalina_home       = params_lookup( 'catalina_home' ),
   $my_class            = params_lookup( 'my_class' ),
   $source              = params_lookup( 'source' ),
   $source_dir          = params_lookup( 'source_dir' ),
