@@ -22,15 +22,12 @@ class tomcat::params {
     debian                          => $::lsbmajdistrelease ? {
       5       => 'tomcat5.5',
       6       => 'tomcat6',
+      7       => 'tomcat7',
       default => 'tomcat6',
     },
     /(?i:CentOS|RedHat|Scientific)/ => $::lsbmajdistrelease ? {
       5       => 'tomcat5',
       6       => 'tomcat6',
-      default => 'tomcat6',
-    },
-    /(?i:Amazon)/ => $::lsbmajdistrelease ? {
-      3       => 'tomcat6',
       default => 'tomcat6',
     },
     /(?i:SLES|OpenSuSe)/            => 'tomcat6',
@@ -40,9 +37,18 @@ class tomcat::params {
   # Todo: What to do when $pkgver = 'tomcat' without any number?
   $version = inline_template("<%= '${pkgver}'.scan(/\d/).first %>")
 
-  $catalina_home = "/usr/share/${pkgver}"
-
   ### Application related parameters
+  $manager_package = $::operatingsystem ? {
+    /(?i:Debian|Ubuntu)/            => "tomcat${version}-admin",
+    /(?i:CentOS|RedHat|Scientific)/ => "tomcat${version}-admin-webapps",
+    default                         => undef,
+  }
+
+  $manager_dir = $::operatingsystem ? {
+    /(?i:Debian|Ubuntu)/            => "/usr/share/${pkgver}-admin/manager",
+    /(?i:CentOS|RedHat|Scientific)/ => "/var/lib/${pkgver}/webapps/manager",
+    default                         => undef,
+  }
 
   $package = $tomcat::params::pkgver
 
@@ -61,7 +67,12 @@ class tomcat::params {
   }
 
   $process_user = $::operatingsystem ? {
-    default => 'tomcat',
+    /(?i:Debian)/ => $::lsbmajdistrelease ? {
+      6       => 'tomcat6',
+      7       => 'tomcat7',
+      default => 'tomcat',
+    },
+    default       => 'tomcat',
   }
 
   $config_dir = $::operatingsystem ? {
