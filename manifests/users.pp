@@ -15,21 +15,21 @@
 # Usage:
 # With standard template:
 # tomcat::users  { 'users':
-#	source => 'puppet:///files/tomcat/users.xml'
+#   source => 'puppet:///files/tomcat/users.xml',
 # }
 #
 # Notes
 # =====
 
 define tomcat::users (
-  $filemode               = '0640',
-  $source		  ='',
+  $filemode = '0640',
+  $source   ='',
   ) {
 
   require tomcat
 
 
-  file { "tomcat_users":
+  file { "tomcat_users_${name}":
     ensure  => file,
     path    => "${tomcat::config_dir}/tomcat-users.xml",
     mode    => $filemode,

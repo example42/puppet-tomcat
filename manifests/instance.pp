@@ -349,9 +349,9 @@ define tomcat::instance (
       process  => 'java',
       argument => $instance_name,
       service  => "tomcat-${instance_name}",
-      pidfile  => "${instance_rundir}/tomcat-${instance_name}.pid",
+      pidfile  => "/var/run/${tomcat::params::pkgver}-${instance_name}.pid",
       enable   => true,
-      tool     => $monitor_tool,
+      tool     => $::monitor_tool,
     }
 
     monitor::port { "tomcat-${instance_name}-${http_port}":
@@ -359,7 +359,7 @@ define tomcat::instance (
       port     => $http_port,
       target   => $::fqdn,
       enable   => true,
-      tool     => $monitor_tool,
+      tool     => $::monitor_tool,
     }
   }
   if $puppi == true {
@@ -368,13 +368,13 @@ define tomcat::instance (
       processname  => $instance_name,
       configdir    => "${instance_path}/conf/",
       bindir       => "${instance_path}/bin/",
-      pidfile      => "${instance_rundir}/tomcat-${instance_name}.pid",
+      pidfile      => "/var/run/${tomcat::params::pkgver}-${instance_name}.pid",
       datadir      => "${instance_path}/webapps",
       logdir       => "${instance_path}/logs",
       httpport     => $http_port,
       controlport  => $control_port,
       ajpport      => $ajp_port,
-      description => "Info for ${instance_name} Tomcat instance" ,
+      description  => "Info for ${instance_name} Tomcat instance" ,
     }
   }
 
@@ -399,7 +399,7 @@ define tomcat::instance (
     if ! defined(Apache::Module['proxy_http']) {
       apache::module { 'proxy_http': }
     }
-    
+
     if ! defined(Apache::Module['proxy_ajp']) {
       if $ajp_port != '' {
         apache::module { 'proxy_ajp': }
@@ -413,7 +413,7 @@ define tomcat::instance (
     }
 
     if $apache_vhost_server_name == '' {
-      fail("You must specify the parameter apache_vhost_server_name on your tomcat::install when apache_vhost_create == true")
+      fail('You must specify the parameter apache_vhost_server_name on your tomcat::install when apache_vhost_create == true')
     }
 
     apache::vhost { $instance_name:

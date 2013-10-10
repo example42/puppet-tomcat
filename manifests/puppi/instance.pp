@@ -21,7 +21,7 @@ define tomcat::puppi::instance (
   require puppi
   require puppi::params
 
-  puppi::log { "${name}":
+  puppi::log { $name:
     log => "${logdir}/catalina.out",
   }
 
