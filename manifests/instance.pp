@@ -37,8 +37,8 @@ define tomcat::instance (
   $tomcatuser                   = '',
   $tomcatpassword               = '',
 
-  $puppi                        = true,
-  $monitor                      = true,
+  $puppi                        = false,
+  $monitor                      = false,
 
   $manager                      = false,
 
@@ -82,18 +82,18 @@ define tomcat::instance (
   $instance_shutdown = "${instance_path}/bin/shutdown.sh"
 
   $instance_init_template = $init_template ? {
-    ''      => "tomcat/instance/init${tomcat::version}-${::operatingsystem}.erb",
+    ''      => "tomcat/instance/init${tomcat::version}-${::osfamily}.erb",
     default => $init_template
   }
 
   $instance_init_defaults_template = $init_defaults_template ? {
-    ''      => "tomcat/instance/defaults${tomcat::version}-${::operatingsystem}.erb",
+    ''      => "tomcat/instance/defaults${tomcat::version}-${::osfamily}.erb",
     default => $init_template
   }
 
-  $instance_init_defaults_template_path = $::operatingsystem ? {
-    debian => "/etc/default/tomcat${tomcat::version}-${instance_name}",
-    redhat => "/etc/sysconfig/tomcat${tomcat::version}-${instance_name}",
+  $instance_init_defaults_template_path = $::osfamily ? {
+    Debian => "/etc/default/tomcat${tomcat::version}-${instance_name}",
+    RedHat => "/etc/sysconfig/tomcat${tomcat::version}-${instance_name}",
   }
 
   # Create instance
