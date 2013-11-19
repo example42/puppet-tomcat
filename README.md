@@ -20,10 +20,21 @@ For detailed info about the logic and usage patterns of Example42 modules read R
 
         class { "tomcat": }
 
-* Disable tomcat service.
+* Disable tomcat service and create single tomcat instances (note for each for them you must specify (different) http_port and control_port
 
         class { "tomcat":
           disable => true
+        }
+
+        tomcat::instance { 'my_app':
+          http_port    => '8088',
+          control_port => '6088',
+        }
+
+        tomcat::instance { 'other_app':
+          http_port    => '8089',
+          control_port => '6089',
+          ajp_port     => '9089',
         }
 
 * Disable tomcat service at boot time, but don't stop if is running.
@@ -44,6 +55,14 @@ For detailed info about the logic and usage patterns of Example42 modules read R
           audit_only => true
         }
 
+* Install a custom version of tomcat. The default is chose according to OS versions, but you can try to install a different one (given that a tomcat${version} packge is available)
+
+        class { "tomcat": }
+
+        On hiera set this key with the version value you want:
+        tomcat::params::version: 7
+
+Note: that some templates used by tomcat::instance may not be present for your version. You should provide them with the *_template parameters.
 
 ## USAGE - Overrides and Customizations
 * Use custom sources for main config file 

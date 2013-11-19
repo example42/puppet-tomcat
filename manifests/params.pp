@@ -12,39 +12,41 @@
 # This class is not intended to be used directly.
 # It may be imported or inherited by other classes
 #
-class tomcat::params {
+class tomcat::params ( $version = '' ) {
 
   ### Application related parameters
 
   # Let's deal with versions madness
-  $pkgver = $::operatingsystem ? {
-    ubuntu                          => 'tomcat6',
-    debian                          => $::lsbmajdistrelease ? {
-      5       => 'tomcat5.5',
-      6       => 'tomcat6',
-      7       => 'tomcat7',
-      default => 'tomcat6',
+  $real_version = $version ? {
+    ''    => $::operatingsystem ? {
+      ubuntu                          => '6',
+      debian                          => $::lsbmajdistrelease ? {
+        5       => '5.5',
+        6       => '6',
+        7       => '7',
+        default => '6',
+      },
+      /(?i:CentOS|RedHat|Scientific)/ => $::lsbmajdistrelease ? {
+        5       => '5',
+        6       => '6',
+        default => '6',
+      },
+      /(?i:Amazon)/ => $::lsbmajdistrelease ? {
+        3       => '6',
+        default => '6',
+      },
+      /(?i:SLES|OpenSuSe)/            => '6',
+      default                         => '6',
     },
-    /(?i:CentOS|RedHat|Scientific)/ => $::lsbmajdistrelease ? {
-      5       => 'tomcat5',
-      6       => 'tomcat6',
-      default => 'tomcat6',
-    },
-    /(?i:Amazon)/ => $::lsbmajdistrelease ? {
-      3       => 'tomcat6',
-      default => 'tomcat6',
-    },
-    /(?i:SLES|OpenSuSe)/            => 'tomcat6',
-    default                         => 'tomcat',
+    default => $version,
   }
 
-  # Todo: What to do when $pkgver = 'tomcat' without any number?
-  $version = inline_template("<%= '${pkgver}'.scan(/\d/).first %>")
+  $pkgver = "tomcat${real_version}"
 
   ### Application related parameters
   $manager_package = $::operatingsystem ? {
-    /(?i:Debian|Ubuntu)/            => "tomcat${version}-admin",
-    /(?i:CentOS|RedHat|Scientific)/ => "tomcat${version}-admin-webapps",
+    /(?i:Debian|Ubuntu)/            => "${pkgver}-admin",
+    /(?i:CentOS|RedHat|Scientific)/ => "${pkgver}-admin-webapps",
     default                         => undef,
   }
 

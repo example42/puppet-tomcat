@@ -39,6 +39,7 @@ define tomcat::instance (
 
   $puppi                        = false,
   $monitor                      = false,
+  $monitor_tool                 = $::monitor_tool,
 
   $manager                      = false,
 
@@ -55,7 +56,7 @@ define tomcat::instance (
 
   require tomcat::params
 
-  $tomcat_version = $tomcat::params::version
+  $tomcat_version = $tomcat::params::real_version
 
   # Application name, required
   $instance_name = $name
@@ -82,18 +83,18 @@ define tomcat::instance (
   $instance_shutdown = "${instance_path}/bin/shutdown.sh"
 
   $instance_init_template = $init_template ? {
-    ''      => "tomcat/instance/init${tomcat::version}-${::osfamily}.erb",
+    ''      => "tomcat/instance/init${tomcat_version}-${::osfamily}.erb",
     default => $init_template
   }
 
   $instance_init_defaults_template = $init_defaults_template ? {
-    ''      => "tomcat/instance/defaults${tomcat::version}-${::osfamily}.erb",
+    ''      => "tomcat/instance/defaults${tomcat_version}-${::osfamily}.erb",
     default => $init_template
   }
 
   $instance_init_defaults_template_path = $::osfamily ? {
-    Debian => "/etc/default/tomcat${tomcat::version}-${instance_name}",
-    RedHat => "/etc/sysconfig/tomcat${tomcat::version}-${instance_name}",
+    Debian => "/etc/default/tomcat${tomcat_version}-${instance_name}",
+    RedHat => "/etc/sysconfig/tomcat${tomcat_version}-${instance_name}",
   }
 
   # Create instance
@@ -351,7 +352,7 @@ define tomcat::instance (
       service  => "tomcat-${instance_name}",
       pidfile  => "/var/run/${tomcat::params::pkgver}-${instance_name}.pid",
       enable   => true,
-      tool     => $::monitor_tool,
+      tool     => $monitor_tool,
     }
 
     monitor::port { "tomcat-${instance_name}-${http_port}":
@@ -359,7 +360,7 @@ define tomcat::instance (
       port     => $http_port,
       target   => $::fqdn,
       enable   => true,
-      tool     => $::monitor_tool,
+      tool     => $monitor_tool,
     }
   }
   if $puppi == true {
