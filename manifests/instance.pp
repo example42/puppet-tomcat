@@ -89,7 +89,7 @@ define tomcat::instance (
 
   $instance_init_defaults_template = $init_defaults_template ? {
     ''      => "tomcat/instance/defaults${tomcat_version}-${::osfamily}.erb",
-    default => $init_template
+    default => $init_defaults_template
   }
 
   $instance_init_defaults_template_path = $::osfamily ? {
