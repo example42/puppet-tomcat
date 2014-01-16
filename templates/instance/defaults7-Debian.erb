@@ -13,7 +13,7 @@ TOMCAT7_GROUP=<%= @instance_group %>
 # OpenJDK, the Sun JDK, and various J2SE 1.5 versions are tried.
 <% if @java_home != '' -%>
 JAVA_HOME=<%= @java_home %>
-<% end %>
+<% end -%>
 
 # You may pass JVM startup parameters to Java here. If unset, the default
 # options will be: -Djava.awt.headless=true -Xmx128m -XX:+UseConcMarkSweepGC
@@ -22,7 +22,12 @@ JAVA_HOME=<%= @java_home %>
 # response time). If you use that option and you run Tomcat on a machine with
 # exactly one CPU chip that contains one or two cores, you should also add
 # the "-XX:+CMSIncrementalMode" option.
+<% if @java_opts != '' -%>
 JAVA_OPTS="<%= @java_opts %>"
+<% end -%>
+<% if @catalina_opts != '' -%>
+CATALINA_OPTS="<%= @catalina_opts %>"
+<% end -%>
 
 # Java compiler to use for translating JavaServer Pages (JSPs). You can use all
 # compilers that are accepted by Ant's build.compiler property.

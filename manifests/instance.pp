@@ -16,6 +16,7 @@ define tomcat::instance (
   $runtime_dir                  = '',
 
   $java_opts                    = '-Djava.awt.headless=true -Xmx128m  -XX:+UseConcMarkSweepGC',
+  $catalina_opts                = '',
   $java_home                    = '',
 
   $catalina_properties_template = '',
