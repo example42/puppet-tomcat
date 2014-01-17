@@ -78,6 +78,10 @@ class tomcat::params ( $version = '' ) {
       7       => 'tomcat7',
       default => 'tomcat',
     },
+    /(?i:Ubuntu)/ => $::lsbmajdistrelease ? {
+      12      => 'tomcat6',
+      default => 'tomcat',
+    },
     default       => 'tomcat',
   }
 
