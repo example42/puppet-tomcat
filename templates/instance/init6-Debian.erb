@@ -50,8 +50,8 @@ fi
 # The following variables can be overwritten in $DEFAULT
 
 # Run Tomcat 6 as this user ID and group ID
-TOMCAT6_USER=<%= instance_owner %>
-TOMCAT6_GROUP=<%= instance_group %>
+TOMCAT6_USER=<%= @instance_owner %>
+TOMCAT6_GROUP=<%= @instance_group %>
 
 # this is a work-around until there is a suitable runtime replacement 
 # for dpkg-architecture for arch:all packages
