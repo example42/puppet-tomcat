@@ -19,7 +19,7 @@
 # Where your java installation lives
 <% if @java_home != '' -%>
 JAVA_HOME=<%= @java_home %>
-<% end %>
+<% end -%>
 
 # Where your tomcat installation lives
 CATALINA_BASE="/var/lib/tomcat6-<%= @instance_name %>"
@@ -28,7 +28,13 @@ CATALINA_BASE="/var/lib/tomcat6-<%= @instance_name %>"
 #CATALINA_TMPDIR="/var/cache/tomcat6/temp"
 
 # You can pass some parameters to java here if you wish to
+<% if @java_opts != '' -%>
 JAVA_OPTS="<%= @java_opts %>"
+<% end -%>
+<% if @catalina_opts != '' -%>
+CATALINA_OPTS="<%= @catalina_opts %>"
+<% end -%>
+
 
 # What user should run tomcat
 TOMCAT_USER="<%= @instance_owner %>"
