@@ -73,7 +73,7 @@ class tomcat::params ( $version = '' ) {
   }
 
   $process_user = $::operatingsystem ? {
-    /(?i:Debian)/ => $::lsbmajdistrelease ? {
+    /(?i:Debian)/ => $real_version ? {
       6       => 'tomcat6',
       7       => 'tomcat7',
       default => 'tomcat',

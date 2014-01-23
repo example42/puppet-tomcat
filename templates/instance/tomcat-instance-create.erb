@@ -138,8 +138,8 @@ else
 fi
 
 mkdir -p ${REALRUNTIMEDIR}/webapps
-cp -a /usr/share/<%= scope.lookupvar('tomcat::params::pkgver') %>/webapps/ROOT ${REALRUNTIMEDIR}/webapps/
-chown -r ${OWNER}:${GROUP} ${REALRUNTIMEDIR}/webapps
+cp -a <%= scope.lookupvar('tomcat::params::data_dir') %>/ROOT ${REALRUNTIMEDIR}/webapps/
+chown -R ${OWNER}:${GROUP} ${REALRUNTIMEDIR}/webapps
 
 mkdir -p ${REALRUNTIMEDIR}/work
 chown ${OWNER}:${GROUP} ${REALRUNTIMEDIR}/work
@@ -147,16 +147,16 @@ chown ${OWNER}:${GROUP} ${REALRUNTIMEDIR}/work
 mkdir -p ${REALRUNTIMEDIR}/temp
 chown ${OWNER}:${GROUP} ${REALRUNTIMEDIR}/temp
 
-mkdir -p /etc/<%= scope.lookupvar('tomcat::params::pkgver') %>-${INSTANCE_NAME}
-ln -s /etc/<%= scope.lookupvar('tomcat::params::pkgver') %>-${INSTANCE_NAME} ${TARGET}/conf
+mkdir -p <%= scope.lookupvar('tomcat::params::config_dir') %>-${INSTANCE_NAME}
+ln -s <%= scope.lookupvar('tomcat::params::config_dir') %>-${INSTANCE_NAME} ${TARGET}/conf
 
-mkdir -p /var/log/<%= scope.lookupvar('tomcat::params::pkgver') %>-${INSTANCE_NAME}
-chown ${OWNER}:${GROUP} /var/log/<%= scope.lookupvar('tomcat::params::pkgver') %>-${INSTANCE_NAME}
-ln -s /var/log/<%= scope.lookupvar('tomcat::params::pkgver') %>-${INSTANCE_NAME} ${TARGET}/logs
+mkdir -p <%= scope.lookupvar('tomcat::params::log_dir') %>-${INSTANCE_NAME}
+chown ${OWNER}:${GROUP} <%= scope.lookupvar('tomcat::params::log_dir') %>-${INSTANCE_NAME}
+ln -s <%= scope.lookupvar('tomcat::params::log_dir') %>-${INSTANCE_NAME} ${TARGET}/logs
 
 mkdir -p ${TARGET}/bin
 
-cp -a /etc/<%= scope.lookupvar('tomcat::params::pkgver') %>/* ${TARGET}/conf/
+cp -a <%= scope.lookupvar('tomcat::params::config_dir') %>/* ${TARGET}/conf/
 
 sed -i -e "s/Connector port=\"8080\"/Connector port=\"${HPORT}\"/;s/Server port=\"8005\" shutdown=\"SHUTDOWN\"/Server port=\"${CPORT}\" shutdown=\"${CWORD}\"/" ${TARGET}/conf/server.xml
 
