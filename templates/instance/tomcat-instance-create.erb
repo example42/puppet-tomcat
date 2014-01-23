@@ -139,7 +139,7 @@ fi
 
 mkdir -p ${REALRUNTIMEDIR}/webapps
 cp -a /usr/share/<%= scope.lookupvar('tomcat::params::pkgver') %>/webapps/ROOT ${REALRUNTIMEDIR}/webapps/
-chown -r ${OWNER}:${GROUP} ${REALRUNTIMEDIR}/webapps
+chown -R ${OWNER}:${GROUP} ${REALRUNTIMEDIR}/webapps
 
 mkdir -p ${REALRUNTIMEDIR}/work
 chown ${OWNER}:${GROUP} ${REALRUNTIMEDIR}/work
