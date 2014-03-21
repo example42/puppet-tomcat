@@ -5,6 +5,7 @@ define tomcat::instance (
   $http_port,
   $control_port,
   $ajp_port                     = '',
+  $instance_autorestart         = 'true',
 
   $dirmode                      = '0755',
   $filemode                     = '0644',
@@ -57,6 +58,9 @@ define tomcat::instance (
 
   require tomcat::params
 
+  $bool_instance_autorestart=any2bool($instance_autorestart)
+  $bool_manager=any2bool($manager)
+
   $tomcat_version = $tomcat::params::real_version
 
   # Application name, required
@@ -98,6 +102,12 @@ define tomcat::instance (
     RedHat => "/etc/sysconfig/tomcat${tomcat_version}-${instance_name}",
   }
 
+  #manage restart of the instance automatically
+  $manage_instance_autorestart = $instance_autorestart ? {
+    'true'      => "Service[tomcat-${instance_name}]",
+    'false'     => undef,
+  }
+
   # Create instance
   $instance_create_instance_cmd_template = $create_instance_cmd_template ? {
     ''      => 'tomcat/instance/tomcat-instance-create.erb',
@@ -137,7 +147,7 @@ define tomcat::instance (
   }
 
   # Install Manager if $manager == true
-  if $manager == true {
+  if $bool_manager == true {
     if (!defined(Class['tomcat::manager'])) {
       class { 'tomcat::manager':
         before => Exec["instance_tomcat_${instance_name}"],
@@ -151,7 +161,7 @@ define tomcat::instance (
       owner   => 'root',
       group   => 'root',
       require => Exec["instance_tomcat_${instance_name}"],
-      notify  => Service["tomcat-${instance_name}"],
+      notify  => $manage_instance_autorestart,
       content => template($manager_xml_template),
     }
 
@@ -166,7 +176,6 @@ define tomcat::instance (
     hasrestart => true,
     hasstatus  => $tomcat::params::service_status,
     require    => Exec["instance_tomcat_${instance_name}"],
-    subscribe  => File["instance_tomcat_init_${instance_name}"],
   }
 
   # Create service initd file
@@ -177,7 +186,7 @@ define tomcat::instance (
     owner   => 'root',
     group   => 'root',
     require => Exec["instance_tomcat_${instance_name}"],
-    notify  => Service["tomcat-${instance_name}"],
+    notify  => $manage_instance_autorestart,
     content => template($instance_init_template),
   }
 
@@ -188,7 +197,7 @@ define tomcat::instance (
     owner   => 'root',
     group   => 'root',
     require => Exec["instance_tomcat_${instance_name}"],
-    notify  => Service["tomcat-${instance_name}"],
+    notify  => $manage_instance_autorestart,
     content => template($instance_init_defaults_template),
   }
 
@@ -201,7 +210,7 @@ define tomcat::instance (
       owner   => $instance_owner,
       group   => $instance_group,
       require => Exec["instance_tomcat_${instance_name}"],
-      notify  => Service["tomcat-${instance_name}"],
+      notify  => $manage_instance_autorestart,
       content => template($catalina_properties_template),
     }
   }
@@ -215,7 +224,7 @@ define tomcat::instance (
       owner   => $instance_owner,
       group   => $instance_group,
       require => Exec["instance_tomcat_${instance_name}"],
-      notify  => Service["tomcat-${instance_name}"],
+      notify  => $manage_instance_autorestart,
       content => template($logging_properties_template),
     }
   }
@@ -229,7 +238,7 @@ define tomcat::instance (
       owner   => $instance_owner,
       group   => $instance_group,
       require => Exec["instance_tomcat_${instance_name}"],
-      notify  => Service["tomcat-${instance_name}"],
+      notify  => $manage_instance_autorestart,
       content => template($setenv_sh_template),
     }
   }
@@ -282,7 +291,7 @@ define tomcat::instance (
       owner   => $instance_owner,
       group   => $instance_group,
       require => Exec["instance_tomcat_${instance_name}"],
-      notify  => Service["tomcat-${instance_name}"],
+      notify  => $manage_instance_autorestart,
       content => template($server_xml_template),
     }
   }
@@ -296,7 +305,7 @@ define tomcat::instance (
       owner   => $instance_owner,
       group   => $instance_group,
       require => Exec["instance_tomcat_${instance_name}"],
-      notify  => Service["tomcat-${instance_name}"],
+      notify  => $manage_instance_autorestart,
       content => template($context_xml_template),
     }
   }
@@ -310,7 +319,7 @@ define tomcat::instance (
       owner   => $instance_owner,
       group   => $instance_group,
       require => Exec["instance_tomcat_${instance_name}"],
-      notify  => Service["tomcat-${instance_name}"],
+      notify  => $manage_instance_autorestart,
       content => template($tomcat_users_xml_template),
     }
   }
@@ -324,7 +333,7 @@ define tomcat::instance (
       owner   => $instance_owner,
       group   => $instance_group,
       require => Exec["instance_tomcat_${instance_name}"],
-      notify  => Service["tomcat-${instance_name}"],
+      notify  => $manage_instance_autorestart,
       content => template($web_xml_template),
     }
   }
