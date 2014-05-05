@@ -52,7 +52,7 @@ define tomcat::instance (
   $apache_vhost_server_name     = '',
   $apache_vhost_docroot         = undef,
   $apache_vhost_proxy_alias     = '',
-  $apache_vhost_context         = '',
+  $apache_vhost_context         = ''
 
   ) {
 
@@ -427,9 +427,9 @@ define tomcat::instance (
       fail('You must specify the parameter apache_vhost_server_name on your tomcat::install when apache_vhost_create == true')
     }
 
+    $proxy_alias = $array_instance_apache_vhost_proxy_alias
     apache::vhost { $instance_name:
-      server_name => $apache_vhost_server_name ,
-      proxy_alias => $array_instance_apache_vhost_proxy_alias,
+      server_name => $apache_vhost_server_name,
       template    => $apache_vhost_template,
       docroot     => $apache_vhost_docroot,
     }
