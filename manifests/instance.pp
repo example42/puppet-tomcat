@@ -52,7 +52,7 @@ define tomcat::instance (
   $apache_vhost_server_name     = '',
   $apache_vhost_docroot         = undef,
   $apache_vhost_proxy_alias     = '',
-  $apache_vhost_context         = '',
+  $apache_vhost_context         = ''
 
   ) {
 
