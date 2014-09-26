@@ -6,6 +6,9 @@ define tomcat::instance (
   $control_port,
   $ajp_port                     = '',
   $instance_autorestart         = 'true',
+  $service_enable               = 'true',
+  $service_ensure               = 'running',
+  $service_hasrestart           = 'true',
 
   $dirmode                      = '0755',
   $filemode                     = '0644',
@@ -57,6 +60,11 @@ define tomcat::instance (
   ) {
 
   require tomcat::params
+
+  $ensure_real = $service_ensure ? {
+    'undef' => undef,
+    default => $service_ensure,
+  }
 
   $bool_instance_autorestart=any2bool($instance_autorestart)
   $bool_manager=any2bool($manager)
@@ -169,13 +177,13 @@ define tomcat::instance (
 
   # Running service
   service { "tomcat-${instance_name}":
-    ensure     => running,
-    name       => "${tomcat::params::pkgver}-${instance_name}",
-    enable     => true,
-    pattern    => $instance_name,
-    hasrestart => true,
-    hasstatus  => $tomcat::params::service_status,
-    require    => Exec["instance_tomcat_${instance_name}"],
+      ensure     => $ensure_real,
+      name       => "${tomcat::params::pkgver}-${instance_name}",
+      enable     => $service_enable,
+      pattern    => $instance_name,
+      hasrestart => $service_hasrestart,
+      hasstatus  => $tomcat::params::service_status,
+      require => Exec["instance_tomcat_${instance_name}"],
   }
 
   # Create service initd file
