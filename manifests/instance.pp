@@ -26,6 +26,7 @@ define tomcat::instance (
   $catalina_properties_template = '',
   $logging_properties_template  = '',
   $init_template                = '',
+  $systemd_template             = '',
   $init_defaults_template       = '',
   $startup_sh_template          = '',
   $shutdown_sh_template         = '',
@@ -98,6 +99,14 @@ define tomcat::instance (
   $instance_init_template = $init_template ? {
     ''      => "tomcat/instance/init${tomcat_version}-${::osfamily}.erb",
     default => $init_template
+  }
+
+  $instance_tomcat_init_path = $::osfamily ? {
+    /(?i:CentOS|RedHat|Scientific)/ => $::lsbmajdistrelease ? {
+      7       => "${tomcat::params::config_file_init}-${instance_name}.service",
+      default => "${tomcat::params::config_file_init}-${instance_name}",
+    },
+    default   => "${tomcat::params::config_file_init}-${instance_name}",
   }
 
   $instance_init_defaults_template = $init_defaults_template ? {
@@ -189,13 +198,32 @@ define tomcat::instance (
   # Create service initd file
   file { "instance_tomcat_init_${instance_name}":
     ensure  => present,
-    path    => "${tomcat::params::config_file_init}-${instance_name}",
+    path    => "$instance_tomcat_init_path",
     mode    => '0755',
     owner   => 'root',
     group   => 'root',
     require => Exec["instance_tomcat_${instance_name}"],
     notify  => $manage_instance_autorestart,
     content => template($instance_init_template),
+  }
+
+  if "${tomcat::params::systemd_file_exist}" == 'file' {
+
+    $instance_systemd_template = $systemd_template ? {
+      ''      => "tomcat/instance/systemd${tomcat_version}-${::osfamily}.erb",
+      default => $systemd_template
+    }
+
+    file { "systemd_init_${instance_name}":
+      ensure  => "${tomcat::params::systemd_file_exist}",
+      path    => "${tomcat::params::systemd_file_init}-${instance_name}",
+      mode    => '0755',
+      owner   => 'root',
+      group   => 'root',
+      require => Exec["instance_tomcat_${instance_name}"],
+      notify  => $manage_instance_autorestart,
+      content => template($instance_systemd_template),
+    }
   }
 
   file { "instance_tomcat_defaults_${instance_name}":

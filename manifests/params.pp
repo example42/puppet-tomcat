@@ -29,6 +29,7 @@ class tomcat::params ( $version = '' ) {
       /(?i:CentOS|RedHat|Scientific)/ => $::lsbmajdistrelease ? {
         5       => '5',
         6       => '6',
+        7       => '',
         default => '6',
       },
       /(?i:Amazon)/ => $::lsbmajdistrelease ? {
@@ -105,7 +106,30 @@ class tomcat::params ( $version = '' ) {
     default => 'root',
   }
 
-  $config_file_init = "/etc/init.d/${tomcat::params::pkgver}"
+  $config_file_init = $::operatingsystem ? {
+    /(?i:CentOS|RedHat|Scientific)/ => $::lsbmajdistrelease ? {
+      7       => "/usr/lib/systemd/system/tomcat",
+      default => "/etc/init.d/${tomcat::params::pkgver}",
+    },
+    default   => "/etc/init.d/${tomcat::params::pkgver}",
+  }
+
+  $systemd_file_exist = $::operatingsystem ? {
+    /(?i:CentOS|RedHat|Scientific)/ => $::lsbmajdistrelease ? {
+      7       => file,
+      default => absent,
+      },
+    default => absent,
+  }
+
+
+  $systemd_file_init = $::operatingsystem ? {
+    /(?i:CentOS|RedHat|Scientific)/ => $::lsbmajdistrelease ? {
+      7       => "/usr/sbin/tomcat-sysd",
+      default => undef,
+      },
+    default => undef,
+  }
 
   $pid_file = $::operatingsystem ? {
     default => "/var/run/${tomcat::params::pkgver}.pid",
