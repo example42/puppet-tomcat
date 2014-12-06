@@ -1,0 +1,79 @@
+#!/bin/bash
+#
+# This script provides systemd activation of the tomcat service
+# To create clones of this service:
+# 1) SERVICE_NAME must be defined before calling this script
+# 2) Create /etc/sysconfig/${SERVICE_NAME} from /etc/sysconfig/tomcat
+# to override tomcat defaults
+
+# SERVICE_NAME is a required value only if the service name is 
+# different from 'tomcat'
+#
+export NAME="tomcat-<%= @instance_name %>"
+
+#I'll bet this isn't required. 
+# unset ISBOOT
+
+# For SELinux we need to use 'runuser' not 'su'
+if [ -x "/sbin/runuser" ]; then
+    SU="/sbin/runuser -s /bin/sh"
+else
+    SU="/bin/su -s /bin/sh"
+fi
+
+# Path to the tomcat launch script
+TOMCAT_SCRIPT="/usr/sbin/tomcat"
+
+# Define the tomcat username
+TOMCAT_USER="${TOMCAT_USER:-tomcat}"
+
+# TOMCAT_LOG should be different from catalina.out.
+# Usually the below config is all that is necessary
+TOMCAT_LOG=/var/log/${NAME}/${NAME}-sysd.log
+
+# Get the tomcat config (use this for environment specific settings)
+TOMCAT_CFG="/etc/tomcat/tomcat.conf"
+if [ -r "$TOMCAT_CFG" ]; then
+    . $TOMCAT_CFG
+fi
+
+# Get instance specific config file
+if [ -r "/etc/sysconfig/${NAME}" ]; then
+    . /etc/sysconfig/${NAME}
+fi
+
+# See how we were called.
+function start() {
+    # fix permissions on the log and pid files
+    export CATALINA_PID="/var/run/${NAME}.pid"
+
+    touch $TOMCAT_LOG 2>&1
+    if [ "$?" -eq "0" ]; then
+      chown ${TOMCAT_USER}:${TOMCAT_USER} $TOMCAT_LOG
+    fi
+
+    if [ "$SECURITY_MANAGER" = "true" ]; then
+       ${TOMCAT_SCRIPT} start-security >> $TOMCAT_LOG 2>&1
+    else
+       ${TOMCAT_SCRIPT} start #>> $TOMCAT_LOG 2>&1
+    fi
+}
+
+function stop() {
+    ${TOMCAT_SCRIPT} stop >> $TOMCAT_LOG 2>&1
+}
+
+# See how we were called.
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+esac
+

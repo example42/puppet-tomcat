@@ -1,0 +1,17 @@
+#File managed by puppet
+[Unit]
+Description=Apache Tomcat <%= @instance_name %> Web Application Container
+After=syslog.target network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/sbin/tomcat-sysd-<%= @instance_name %> start
+ExecStop=/usr/sbin/tomcat-sysd-<%= @instance_name %> stop
+SuccessExitStatus=143
+User=<%= @instance_owner %>
+Group=<%= @instance_group %>
+
+
+[Install]
+WantedBy=multi-user.target
+
