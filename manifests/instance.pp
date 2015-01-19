@@ -35,6 +35,8 @@ define tomcat::instance (
   $create_instance_cmd_template = '',
   $create_instance_cmd_exec     = '',
   $server_xml_template          = '',
+  $http_connector_options       = '',
+  $ajp_connector_options        = '',
   $context_xml_template         = '',
   $tomcat_users_xml_template    = '',
   $web_xml_template             = '',
