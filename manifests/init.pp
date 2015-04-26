@@ -326,12 +326,12 @@ class tomcat (
   }
 
   service { 'tomcat':
-    ensure     => $tomcat::manage_service_ensure,
-    name       => $tomcat::service,
-    enable     => $tomcat::manage_service_enable,
-    hasstatus  => $tomcat::service_status,
-    pattern    => $tomcat::process,
-    require    => Package['tomcat'],
+    ensure    => $tomcat::manage_service_ensure,
+    name      => $tomcat::service,
+    enable    => $tomcat::manage_service_enable,
+    hasstatus => $tomcat::service_status,
+    pattern   => $tomcat::process,
+    require   => Package['tomcat'],
   }
 
   file { 'tomcat.conf':

@@ -5,10 +5,10 @@ define tomcat::instance (
   $http_port,
   $control_port,
   $ajp_port                     = '',
-  $instance_autorestart         = 'true',
-  $service_enable               = 'true',
+  $instance_autorestart         = true,
+  $service_enable               = true,
   $service_ensure               = 'running',
-  $service_hasrestart           = 'true',
+  $service_hasrestart           = true,
 
   $dirmode                      = '0755',
   $filemode                     = '0644',
@@ -123,8 +123,8 @@ define tomcat::instance (
 
   #manage restart of the instance automatically
   $manage_instance_autorestart = $instance_autorestart ? {
-    'true'      => "Service[tomcat-${instance_name}]",
-    'false'     => undef,
+    true      => "Service[tomcat-${instance_name}]",
+    false     => undef,
   }
 
   # Create instance
@@ -194,13 +194,13 @@ define tomcat::instance (
       pattern    => $instance_name,
       hasrestart => $service_hasrestart,
       hasstatus  => $tomcat::params::service_status,
-      require => Exec["instance_tomcat_${instance_name}"],
+      require    => Exec["instance_tomcat_${instance_name}"],
   }
 
   # Create service initd file
   file { "instance_tomcat_init_${instance_name}":
     ensure  => present,
-    path    => "$instance_tomcat_init_path",
+    path    => $instance_tomcat_init_path,
     mode    => '0755',
     owner   => 'root',
     group   => 'root',
@@ -209,7 +209,7 @@ define tomcat::instance (
     content => template($instance_init_template),
   }
 
-  if "${tomcat::params::systemd_file_exist}" == 'file' {
+  if $::tomcat::params::systemd_file_exist == 'file' {
 
     $instance_systemd_template = $systemd_template ? {
       ''      => "tomcat/instance/systemd${tomcat_version}-${::osfamily}.erb",
@@ -217,7 +217,7 @@ define tomcat::instance (
     }
 
     file { "systemd_init_${instance_name}":
-      ensure  => "${tomcat::params::systemd_file_exist}",
+      ensure  => $::tomcat::params::systemd_file_exist,
       path    => "${tomcat::params::systemd_file_init}-${instance_name}",
       mode    => '0755',
       owner   => 'root',
@@ -413,17 +413,17 @@ define tomcat::instance (
   }
   if $puppi == true {
     tomcat::puppi::instance { "tomcat-${instance_name}":
-      servicename  => "tomcat-${instance_name}",
-      processname  => $instance_name,
-      configdir    => "${instance_path}/conf/",
-      bindir       => "${instance_path}/bin/",
-      pidfile      => "/var/run/${tomcat::params::pkgver}-${instance_name}.pid",
-      datadir      => "${instance_path}/webapps",
-      logdir       => "${instance_path}/logs",
-      httpport     => $http_port,
-      controlport  => $control_port,
-      ajpport      => $ajp_port,
-      description  => "Info for ${instance_name} Tomcat instance" ,
+      servicename => "tomcat-${instance_name}",
+      processname => $instance_name,
+      configdir   => "${instance_path}/conf/",
+      bindir      => "${instance_path}/bin/",
+      pidfile     => "/var/run/${tomcat::params::pkgver}-${instance_name}.pid",
+      datadir     => "${instance_path}/webapps",
+      logdir      => "${instance_path}/logs",
+      httpport    => $http_port,
+      controlport => $control_port,
+      ajpport     => $ajp_port,
+      description => "Info for ${instance_name} Tomcat instance" ,
     }
   }
 
