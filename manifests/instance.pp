@@ -467,9 +467,10 @@ define tomcat::instance (
 
     $proxy_alias = $array_instance_apache_vhost_proxy_alias
     apache::vhost { $instance_name:
-      server_name => $apache_vhost_server_name,
-      template    => $apache_vhost_template,
-      docroot     => $apache_vhost_docroot,
+      server_name   => $apache_vhost_server_name,
+      template      => $apache_vhost_template,
+      docroot       => $apache_vhost_docroot,
+      proxy_aliases => $proxy_alias,
     }
   }
 

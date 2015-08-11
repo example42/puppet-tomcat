@@ -45,16 +45,16 @@
 <% end -%>
 <% end -%>
 
-<% if @proxy_alias != "" -%>
-<% if @proxy_alias.is_a? Array -%>
-<% @proxy_alias.each do |singleproxyalias| %>
+<% if @proxy_aliases != "" -%>
+<% if @proxy_aliases.is_a? Array -%>
+<% @proxy_aliases.each do |singleproxyalias| %>
 
     ProxyPass <%= singleproxyalias %>
     ProxyPassReverse <%= singleproxyalias %>
 <% end -%>
 <% else -%>
-    ProxyPass <%= @proxy_alias %>
-    ProxyPassReverse <%= @proxy_alias %>
+    ProxyPass <%= @proxy_aliases %>
+    ProxyPassReverse <%= @proxy_aliases %>
 <% end -%>
 <% end -%>
 
