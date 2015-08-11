@@ -21,19 +21,19 @@ class tomcat::params ( $version = '' ) {
     ''    => $::operatingsystem ? {
       ubuntu                          => '6',
       debian                          => $::lsbmajdistrelease ? {
-        5       => '5.5',
-        6       => '6',
-        7       => '7',
+        '5'     => '5.5',
+        '6'     => '6',
+        '7'     => '7',
         default => '6',
       },
       /(?i:CentOS|RedHat|Scientific)/ => $::lsbmajdistrelease ? {
-        5       => '5',
-        6       => '6',
-        7       => '',
+        '5'     => '5',
+        '6'     => '6',
+        '7'     => '',
         default => '6',
       },
       /(?i:Amazon)/ => $::lsbmajdistrelease ? {
-        3       => '6',
+        '3'     => '6',
         default => '6',
       },
       /(?i:SLES|OpenSuSe)/            => '6',
@@ -75,12 +75,12 @@ class tomcat::params ( $version = '' ) {
 
   $process_user = $::operatingsystem ? {
     /(?i:Debian)/ => $real_version ? {
-      6       => 'tomcat6',
-      7       => 'tomcat7',
+      '6'     => 'tomcat6',
+      '7'     => 'tomcat7',
       default => 'tomcat',
     },
     /(?i:Ubuntu)/ => $::lsbmajdistrelease ? {
-      12      => 'tomcat6',
+      '12'    => 'tomcat6',
       default => 'tomcat',
     },
     default       => 'tomcat',
@@ -108,7 +108,7 @@ class tomcat::params ( $version = '' ) {
 
   $config_file_init = $::operatingsystem ? {
     /(?i:CentOS|RedHat|Scientific)/ => $::lsbmajdistrelease ? {
-      7       => "/usr/lib/systemd/system/tomcat",
+      '7'     => '/usr/lib/systemd/system/tomcat',
       default => "/etc/init.d/${tomcat::params::pkgver}",
     },
     default   => "/etc/init.d/${tomcat::params::pkgver}",
@@ -116,7 +116,7 @@ class tomcat::params ( $version = '' ) {
 
   $systemd_file_exist = $::operatingsystem ? {
     /(?i:CentOS|RedHat|Scientific)/ => $::lsbmajdistrelease ? {
-      7       => file,
+      '7'     => file,
       default => absent,
       },
     default => absent,
@@ -125,7 +125,7 @@ class tomcat::params ( $version = '' ) {
 
   $systemd_file_init = $::operatingsystem ? {
     /(?i:CentOS|RedHat|Scientific)/ => $::lsbmajdistrelease ? {
-      7       => "/usr/sbin/tomcat-sysd",
+      '7'     => '/usr/sbin/tomcat-sysd',
       default => undef,
       },
     default => undef,

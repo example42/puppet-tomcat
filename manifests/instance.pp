@@ -105,7 +105,7 @@ define tomcat::instance (
 
   $instance_tomcat_init_path = $::osfamily ? {
     /(?i:CentOS|RedHat|Scientific)/ => $::lsbmajdistrelease ? {
-      7       => "${tomcat::params::config_file_init}-${instance_name}.service",
+      '7'     => "${tomcat::params::config_file_init}-${instance_name}.service",
       default => "${tomcat::params::config_file_init}-${instance_name}",
     },
     default   => "${tomcat::params::config_file_init}-${instance_name}",
@@ -117,8 +117,8 @@ define tomcat::instance (
   }
 
   $instance_init_defaults_template_path = $::osfamily ? {
-    Debian => "/etc/default/tomcat${tomcat_version}-${instance_name}",
-    RedHat => "/etc/sysconfig/tomcat${tomcat_version}-${instance_name}",
+    'Debian' => "/etc/default/tomcat${tomcat_version}-${instance_name}",
+    'RedHat' => "/etc/sysconfig/tomcat${tomcat_version}-${instance_name}",
   }
 
   #manage restart of the instance automatically
@@ -455,7 +455,7 @@ define tomcat::instance (
       }
     }
 
-    if $manager == true {
+    if $bool_manager == true {
       $array_instance_apache_vhost_proxy_alias = concat( [ $instance_apache_vhost_proxy_alias ] , [ "/manager http://localhost:${http_port}/manager" ] )
     } else {
       $array_instance_apache_vhost_proxy_alias = $instance_apache_vhost_proxy_alias

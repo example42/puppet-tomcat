@@ -4,7 +4,7 @@ describe 'tomcat' do
 
   let(:title) { 'tomcat' }
   let(:node) { 'rspec.example42.com' }
-  let(:facts) { { :ipaddress => '10.42.42.42' } }
+  let(:facts) { { :ipaddress => '10.42.42.42', :operatingsystemrelease => '6.6', :lsbmajdistrelease => '6' } }
 
   describe 'Test standard installation' do
     it { should contain_package('tomcat').with_ensure('present') }
@@ -160,7 +160,7 @@ describe 'tomcat' do
   end
 
   describe 'Test params lookup' do
-    let(:facts) { { :monitor => true , :ipaddress => '10.42.42.42' } }
+    let(:facts) { { :monitor => true , :ipaddress => '10.42.42.42', :operatingsystemrelease => '6.6', :lsbmajdistrelease => '6' } }
     let(:params) { { :port => '42' } }
 
     it 'should honour top scope global vars' do
@@ -169,7 +169,7 @@ describe 'tomcat' do
   end
 
   describe 'Test params lookup' do
-    let(:facts) { { :tomcat_monitor => true , :ipaddress => '10.42.42.42' } }
+    let(:facts) { { :tomcat_monitor => true , :ipaddress => '10.42.42.42', :operatingsystemrelease => '6.6', :lsbmajdistrelease => '6' } }
     let(:params) { { :port => '42' } }
 
     it 'should honour module specific vars' do
@@ -178,7 +178,7 @@ describe 'tomcat' do
   end
 
   describe 'Test params lookup' do
-    let(:facts) { { :monitor => false , :tomcat_monitor => true , :ipaddress => '10.42.42.42' } }
+    let(:facts) { { :monitor => false , :tomcat_monitor => true , :ipaddress => '10.42.42.42', :operatingsystemrelease => '6.6', :lsbmajdistrelease => '6' } }
     let(:params) { { :port => '42' } }
 
     it 'should honour top scope module specific over global vars' do
@@ -187,7 +187,7 @@ describe 'tomcat' do
   end
 
   describe 'Test params lookup' do
-    let(:facts) { { :monitor => false , :ipaddress => '10.42.42.42' } }
+    let(:facts) { { :monitor => false , :ipaddress => '10.42.42.42', :operatingsystemrelease => '6.6', :lsbmajdistrelease => '6' } }
     let(:params) { { :monitor => true , :firewall => true, :port => '42' } }
 
     it 'should honour passed params over global vars' do

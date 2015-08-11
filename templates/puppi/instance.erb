@@ -14,19 +14,19 @@ show_command "ls -latr <%= @configdir %>"
 
 <% if @datadir != "" -%>
 # Show data dir
-echo_title "$HOSTNAME - <%= @name %>: Application data are in: <% @datadir %>"
+echo_title "$HOSTNAME - <%= @name %>: Application data are in: <%= @datadir %>"
 show_command "ls -latr <%= @datadir %>"
 <% end -%>
 
 <% if @bindir != "" -%>
 # Show bin dir
-echo_title "$HOSTNAME - <%= @name %>: Startup scripts are in: <% @bindir %>"
+echo_title "$HOSTNAME - <%= @name %>: Startup scripts are in: <%= @bindir %>"
 show_command "ls -latr <%= @bindir %>"
 <% end -%>
 
 <% if @logdir != "" -%>
 # Show log dir
-echo_title "$HOSTNAME - <%= @name %>: Logs are in: <% @logdir %>"
+echo_title "$HOSTNAME - <%= @name %>: Logs are in: <%= @logdir %>"
 show_command "ls -latr <%= @logdir %>"
 show_command "tail -30 <%= @logdir %>/catalina.out"
 <% end -%>
@@ -40,7 +40,7 @@ echo_title "$HOSTNAME - <%= @name %>: Extra info"
 
 <% if @servicename != "" -%>
 # Show service info
-echo_title "$HOSTNAME - <%= @name %>: Services: <% @servicename %>"
+echo_title "$HOSTNAME - <%= @name %>: Services: <%= @servicename %>"
 show_command "/etc/init.d/<%= @servicename %> status"
 <% if @verbose == "yes" -%>
 show_command "ps -adef | grep java | grep <%= @processname %>"

@@ -13,9 +13,9 @@
     ServerAlias <%= @serveraliases %>
 <% end -%>
 <% end -%>
-<% if env_variables != "" -%>
-<% if env_variables.is_a? Array -%>
-<% env_variables.each do |envvars| -%>
+<% if @env_variables != "" -%>
+<% if @env_variables.is_a? Array -%>
+<% @env_variables.each do |envvars| -%>
     SetEnv <%= envvars %>
 <% end -%>
 <% end -%>
@@ -37,7 +37,7 @@
 
 <% if @aliases != "" -%>
 <% if @aliases.is_a? Array -%>
-<% aliases.each do |singlealias| %>
+<% @aliases.each do |singlealias| %>
     Alias <%= singlealias %>
 <% end -%>
 <% else -%>
