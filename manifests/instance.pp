@@ -104,7 +104,7 @@ define tomcat::instance (
   }
 
   $instance_tomcat_init_path = $::osfamily ? {
-    /(?i:CentOS|RedHat|Scientific)/ => $::lsbmajdistrelease ? {
+    /(?i:CentOS|RedHat|Scientific)/ => $::operatingsystemmajrelease ? {
       '7'     => "${tomcat::params::config_file_init}-${instance_name}.service",
       default => "${tomcat::params::config_file_init}-${instance_name}",
     },
