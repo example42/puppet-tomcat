@@ -1,6 +1,6 @@
 {
   "name": "example42-tomcat",
-  "version": "2.1.9",
+  "version": "2.1.10",
   "summary": "Puppet module for tomcat",
   "author": "Alessandro Franceschi",
   "description": "This module installs and manages tomcat. Check README.rdoc for details. Puppi is required for some common functions: you can install them without using the whole module. Monitor and firewall dependencies are needed only if the relevant features are enabled",
